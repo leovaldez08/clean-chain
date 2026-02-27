@@ -56,35 +56,18 @@ CREATE POLICY "Drivers can resolve incidents"
   WITH CHECK (auth.role() = 'authenticated');
 
 -- 6. Storage bucket for incident photos
--- Run this in Supabase Dashboard > Storage > Create bucket:
--- Name: incident-photos
--- Public: true (for read access to photo URLs)
---
--- Then add these storage policies via SQL:
+-- STEP 1: Create bucket "incident-photos" in Supabase Dashboard > Storage (set to Public)
+-- STEP 2: Run the policies below AFTER creating the bucket:
 
--- Allow anyone to upload photos
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-SELECT
-  'Anyone can upload photos',
-  'incident-photos',
-  'INSERT',
-  '(true)'
-WHERE NOT EXISTS (
-  SELECT 1 FROM storage.policies
-  WHERE name = 'Anyone can upload photos' AND bucket_id = 'incident-photos'
-);
+-- Allow anyone to upload photos to incident-photos bucket
+CREATE POLICY "Allow public uploads to incident-photos"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'incident-photos');
 
--- Allow public read access to photos
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-SELECT
-  'Public photo read access',
-  'incident-photos',
-  'SELECT',
-  '(true)'
-WHERE NOT EXISTS (
-  SELECT 1 FROM storage.policies
-  WHERE name = 'Public photo read access' AND bucket_id = 'incident-photos'
-);
+-- Allow public read access to incident photos
+CREATE POLICY "Allow public read access to incident-photos"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'incident-photos');
 
 -- 7. Function: Check nearby duplicates (within 30m, last 2 hours)
 CREATE OR REPLACE FUNCTION check_nearby_duplicate(
