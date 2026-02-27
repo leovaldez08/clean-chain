@@ -15,6 +15,7 @@ import { submitReport } from "@/actions/citizen";
 import { isWithinMadurai, getDeviceInfo } from "@/lib/geo";
 import { createClient } from "@/lib/supabase/client";
 import { SEVERITY_OPTIONS } from "@/lib/constants";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function CitizenPage() {
   const [photo, setPhoto] = useState<File | null>(null);
@@ -56,7 +57,7 @@ export default function CitizenPage() {
         setGpsLoading(false);
         toast.success("GPS location captured!");
       },
-      (err) => {
+      () => {
         toast.error("Failed to get location. Please enable GPS and try again.");
         setGpsLoading(false);
       },
@@ -70,7 +71,6 @@ export default function CitizenPage() {
 
     startTransition(async () => {
       try {
-        // Ensure anonymous auth
         const supabase = createClient();
         const {
           data: { session },
@@ -112,6 +112,9 @@ export default function CitizenPage() {
   if (submitted) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
         <div className="max-w-sm w-full text-center animate-fade-up">
           <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-emerald-500" />
@@ -141,23 +144,24 @@ export default function CitizenPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-            <Camera className="w-4 h-4 text-white" />
+        <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <Camera className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-sm">CleanChain</h1>
+              <p className="text-xs text-muted-foreground">
+                Report Waste Incident
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-sm">CleanChain</h1>
-            <p className="text-xs text-muted-foreground">
-              Report Waste Incident
-            </p>
-          </div>
+          <ThemeToggle />
         </div>
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {/* Photo Capture */}
         <section className="space-y-3">
           <label className="text-sm font-semibold flex items-center gap-2">
             <Camera className="w-4 h-4 text-emerald-500" />
@@ -174,6 +178,7 @@ export default function CitizenPage() {
           />
           {photoPreview ? (
             <div className="relative rounded-xl overflow-hidden border border-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photoPreview}
                 alt="Captured incident"
@@ -201,7 +206,6 @@ export default function CitizenPage() {
           )}
         </section>
 
-        {/* GPS */}
         <section className="space-y-3">
           <label className="text-sm font-semibold flex items-center gap-2">
             <MapPin className="w-4 h-4 text-emerald-500" />
@@ -240,7 +244,6 @@ export default function CitizenPage() {
           )}
         </section>
 
-        {/* Severity */}
         <section className="space-y-3">
           <label className="text-sm font-semibold flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-emerald-500" />
@@ -267,7 +270,6 @@ export default function CitizenPage() {
           </div>
         </section>
 
-        {/* Description */}
         <section className="space-y-3">
           <label className="text-sm font-semibold flex items-center gap-2">
             <Info className="w-4 h-4 text-emerald-500" />
@@ -285,7 +287,6 @@ export default function CitizenPage() {
           />
         </section>
 
-        {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={isPending || !photo || !coords}

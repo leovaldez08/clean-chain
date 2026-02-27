@@ -8,25 +8,23 @@ export async function resolveIncident(formData: FormData) {
   const serviceClient = createServiceClient();
 
   const incidentId = formData.get("incidentId") as string;
-  const driverLat = parseFloat(formData.get("latitude") as string);
-  const driverLng = parseFloat(formData.get("longitude") as string);
+  const supervisorLat = parseFloat(formData.get("latitude") as string);
+  const supervisorLng = parseFloat(formData.get("longitude") as string);
   const photo = formData.get("photo") as File;
 
-  if (!incidentId || !driverLat || !driverLng || !photo) {
+  if (!incidentId || !supervisorLat || !supervisorLng || !photo) {
     return { error: "Incident ID, GPS coordinates, and clearance photo are required." };
   }
 
-  // Verify authenticated driver
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Authentication required." };
   }
 
-  // Validate driver proximity using PostGIS
   const { data: isNearby } = await serviceClient.rpc("validate_driver_proximity", {
     p_incident_id: incidentId,
-    p_driver_lat: driverLat,
-    p_driver_lng: driverLng,
+    p_driver_lat: supervisorLat,
+    p_driver_lng: supervisorLng,
     p_max_distance_meters: DRIVER_CLEARANCE_RADIUS_M,
   });
 
@@ -34,7 +32,6 @@ export async function resolveIncident(formData: FormData) {
     return { error: "You are outside the allowed radius. Move closer to the incident location." };
   }
 
-  // Upload clearance photo
   const fileName = `${Date.now()}-clearance-${Math.random().toString(36).slice(2)}.${photo.name.split(".").pop()}`;
   const { error: uploadError } = await serviceClient.storage
     .from(STORAGE_BUCKET)
@@ -51,7 +48,6 @@ export async function resolveIncident(formData: FormData) {
     .from(STORAGE_BUCKET)
     .getPublicUrl(`clearances/${fileName}`);
 
-  // Get incident to compute response time
   const { data: incident } = await serviceClient
     .from("incidents")
     .select("reported_at")
@@ -67,7 +63,6 @@ export async function resolveIncident(formData: FormData) {
     (Date.now() - reportedAt.getTime()) / (1000 * 60)
   );
 
-  // Update incident
   const { error: updateError } = await serviceClient
     .from("incidents")
     .update({
@@ -86,7 +81,7 @@ export async function resolveIncident(formData: FormData) {
   return { success: true, responseTimeMinutes };
 }
 
-export async function getNearbyPendingIncidents(lat: number, lng: number) {
+export async function getNearbyPendingIncidents() {
   const serviceClient = createServiceClient();
 
   const { data, error } = await serviceClient
@@ -100,7 +95,7 @@ export async function getNearbyPendingIncidents(lat: number, lng: number) {
   return { data, error: null };
 }
 
-export async function loginDriver(formData: FormData) {
+export async function loginSupervisor(formData: FormData) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;

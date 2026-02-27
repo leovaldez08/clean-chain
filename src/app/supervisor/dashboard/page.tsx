@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition } from "react";
+import { useState, useRef, useEffect, useTransition, useCallback } from "react";
 import { toast } from "sonner";
 import {
   MapPin,
@@ -8,16 +8,19 @@ import {
   Loader2,
   CheckCircle2,
   Clock,
-  AlertCircle,
   ChevronRight,
   LogOut,
 } from "lucide-react";
-import { getNearbyPendingIncidents, resolveIncident } from "@/actions/driver";
+import {
+  getNearbyPendingIncidents,
+  resolveIncident,
+} from "@/actions/supervisor";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { Incident } from "@/lib/types";
 
-export default function DriverDashboard() {
+export default function SupervisorDashboard() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(
@@ -25,7 +28,7 @@ export default function DriverDashboard() {
   );
   const [clearancePhoto, setClearancePhoto] = useState<File | null>(null);
   const [clearancePreview, setClearancePreview] = useState<string | null>(null);
-  const [driverCoords, setDriverCoords] = useState<{
+  const [supervisorCoords, setSupervisorCoords] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
@@ -34,32 +37,22 @@ export default function DriverDashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    loadIncidents();
+  const loadIncidents = useCallback(async () => {
+    setLoading(true);
+    const result = await getNearbyPendingIncidents();
+    if (result.data) setIncidents(result.data);
+    setLoading(false);
   }, []);
 
-  const loadIncidents = async () => {
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const result = await getNearbyPendingIncidents(latitude, longitude);
-        if (result.data) setIncidents(result.data);
-        setLoading(false);
-      },
-      () => {
-        toast.error("Location access needed to show nearby incidents.");
-        setLoading(false);
-      },
-      { enableHighAccuracy: true },
-    );
-  };
+  useEffect(() => {
+    loadIncidents();
+  }, [loadIncidents]);
 
-  const grabDriverGPS = () => {
+  const grabGPS = () => {
     setGpsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setDriverCoords({
+        setSupervisorCoords({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
         });
@@ -75,14 +68,14 @@ export default function DriverDashboard() {
   };
 
   const handleClearance = () => {
-    if (!selectedIncident || !clearancePhoto || !driverCoords) return;
+    if (!selectedIncident || !clearancePhoto || !supervisorCoords) return;
 
     startTransition(async () => {
       const formData = new FormData();
       formData.append("incidentId", selectedIncident.id);
       formData.append("photo", clearancePhoto);
-      formData.append("latitude", driverCoords.lat.toString());
-      formData.append("longitude", driverCoords.lng.toString());
+      formData.append("latitude", supervisorCoords.lat.toString());
+      formData.append("longitude", supervisorCoords.lng.toString());
 
       const result = await resolveIncident(formData);
       if (result.error) {
@@ -93,7 +86,7 @@ export default function DriverDashboard() {
       setSelectedIncident(null);
       setClearancePhoto(null);
       setClearancePreview(null);
-      setDriverCoords(null);
+      setSupervisorCoords(null);
       loadIncidents();
     });
   };
@@ -101,7 +94,7 @@ export default function DriverDashboard() {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/driver");
+    router.push("/supervisor");
   };
 
   const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,15 +104,15 @@ export default function DriverDashboard() {
     setClearancePreview(URL.createObjectURL(file));
   };
 
-  const timeSince = (date: string) => {
-    const minutes = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+  const formatTime = (date: string) => {
+    const diff = new Date().getTime() - new Date(date).getTime();
+    const minutes = Math.floor(diff / 60000);
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  // Clearance modal
   if (selectedIncident) {
     return (
       <main className="min-h-screen bg-background">
@@ -130,20 +123,20 @@ export default function DriverDashboard() {
                 setSelectedIncident(null);
                 setClearancePhoto(null);
                 setClearancePreview(null);
-                setDriverCoords(null);
+                setSupervisorCoords(null);
               }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
               ← Back
             </button>
             <h1 className="font-bold text-sm">Clear Incident</h1>
-            <div className="w-12" />
+            <ThemeToggle />
           </div>
         </header>
 
         <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-          {/* Original report */}
           <div className="rounded-xl border border-border overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedIncident.photo_url}
               alt="Incident"
@@ -156,7 +149,7 @@ export default function DriverDashboard() {
                   {selectedIncident.longitude.toFixed(5)}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {timeSince(selectedIncident.reported_at)}
+                  {formatTime(selectedIncident.reported_at)}
                 </span>
               </div>
               {selectedIncident.description && (
@@ -167,13 +160,12 @@ export default function DriverDashboard() {
             </div>
           </div>
 
-          {/* GPS capture */}
           <section className="space-y-3">
             <label className="text-sm font-semibold flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-500" />
               Your Current Location
             </label>
-            {driverCoords ? (
+            {supervisorCoords ? (
               <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                 <div className="text-sm">
@@ -181,13 +173,14 @@ export default function DriverDashboard() {
                     Location captured
                   </p>
                   <p className="text-muted-foreground text-xs font-mono">
-                    {driverCoords.lat.toFixed(6)}, {driverCoords.lng.toFixed(6)}
+                    {supervisorCoords.lat.toFixed(6)},{" "}
+                    {supervisorCoords.lng.toFixed(6)}
                   </p>
                 </div>
               </div>
             ) : (
               <button
-                onClick={grabDriverGPS}
+                onClick={grabGPS}
                 disabled={gpsLoading}
                 className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
               >
@@ -206,7 +199,6 @@ export default function DriverDashboard() {
             )}
           </section>
 
-          {/* Clearance photo */}
           <section className="space-y-3">
             <label className="text-sm font-semibold flex items-center gap-2">
               <Camera className="w-4 h-4 text-emerald-500" />
@@ -222,6 +214,7 @@ export default function DriverDashboard() {
             />
             {clearancePreview ? (
               <div className="relative rounded-xl overflow-hidden border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={clearancePreview}
                   alt="Clearance"
@@ -247,10 +240,9 @@ export default function DriverDashboard() {
             )}
           </section>
 
-          {/* Submit */}
           <button
             onClick={handleClearance}
-            disabled={isPending || !clearancePhoto || !driverCoords}
+            disabled={isPending || !clearancePhoto || !supervisorCoords}
             className="w-full flex items-center justify-center gap-2 py-4 bg-emerald-500 hover:bg-emerald-400 disabled:bg-muted disabled:text-muted-foreground text-white font-semibold rounded-xl transition-all cursor-pointer disabled:cursor-not-allowed"
           >
             {isPending ? (
@@ -270,7 +262,6 @@ export default function DriverDashboard() {
     );
   }
 
-  // Incidents list
   return (
     <main className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -280,18 +271,21 @@ export default function DriverDashboard() {
               <CheckCircle2 className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-sm">Driver Dashboard</h1>
+              <h1 className="font-bold text-sm">Supervisor Dashboard</h1>
               <p className="text-xs text-muted-foreground">
                 Pending clearance tasks
               </p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -320,6 +314,7 @@ export default function DriverDashboard() {
                 onClick={() => setSelectedIncident(incident)}
                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border hover:border-emerald-500/30 bg-card transition-all cursor-pointer text-left"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={incident.photo_url}
                   alt=""
@@ -350,7 +345,7 @@ export default function DriverDashboard() {
                   </p>
                   <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    {timeSince(incident.reported_at)}
+                    {formatTime(incident.reported_at)}
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />

@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const IncidentMap = dynamic(() => import("@/components/incident-map"), {
   ssr: false,
@@ -147,6 +148,7 @@ export default function AdminDashboard() {
                 className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
               />
             </button>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               className="p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"

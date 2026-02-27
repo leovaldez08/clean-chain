@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Truck, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
-import { loginDriver } from "@/actions/driver";
+import { Shield, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import { loginSupervisor } from "@/actions/supervisor";
+import { ThemeToggle } from "@/components/theme-toggle";
 
-export default function DriverLoginPage() {
+export default function SupervisorLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -20,24 +21,27 @@ export default function DriverLoginPage() {
       formData.append("email", email);
       formData.append("password", password);
 
-      const result = await loginDriver(formData);
+      const result = await loginSupervisor(formData);
       if (result.error) {
         toast.error(result.error);
         return;
       }
       toast.success("Welcome back!");
-      router.push("/driver/dashboard");
+      router.push("/supervisor/dashboard");
     });
   };
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm space-y-8 animate-fade-up">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <Truck className="w-8 h-8 text-emerald-500" />
+            <Shield className="w-8 h-8 text-emerald-500" />
           </div>
-          <h1 className="text-2xl font-bold">Driver Login</h1>
+          <h1 className="text-2xl font-bold">Supervisor Login</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Sign in to manage clearance tasks
           </p>
@@ -52,7 +56,7 @@ export default function DriverLoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="driver@cleanchain.in"
+                placeholder="supervisor@cleanchain.in"
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
               />
             </div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Shield, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
 import { loginAdmin } from "@/actions/admin";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -32,6 +33,9 @@ export default function AdminLoginPage() {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm space-y-8 animate-fade-up">
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">

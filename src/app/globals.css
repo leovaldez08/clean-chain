@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* ===== CleanChain Design System ===== */
-
 :root {
   /* Core palette - Emerald civic tech */
   --background: #fafbfc;
@@ -33,33 +31,31 @@
   --status-resolved-bg: #ecfdf5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #030712;
-    --foreground: #f1f5f9;
-    --card: #0f172a;
-    --card-foreground: #f1f5f9;
-    --primary: #34d399;
-    --primary-foreground: #022c22;
-    --secondary: #1e293b;
-    --secondary-foreground: #cbd5e1;
-    --muted: #1e293b;
-    --muted-foreground: #94a3b8;
-    --accent: #064e3b;
-    --accent-foreground: #d1fae5;
-    --destructive: #dc2626;
-    --destructive-foreground: #ffffff;
-    --warning: #d97706;
-    --warning-foreground: #ffffff;
-    --border: #1e293b;
-    --input: #1e293b;
-    --ring: #34d399;
+.dark {
+  --background: #030712;
+  --foreground: #f1f5f9;
+  --card: #0f172a;
+  --card-foreground: #f1f5f9;
+  --primary: #34d399;
+  --primary-foreground: #022c22;
+  --secondary: #1e293b;
+  --secondary-foreground: #cbd5e1;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #064e3b;
+  --accent-foreground: #d1fae5;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #34d399;
 
-    --status-pending: #f87171;
-    --status-resolved: #34d399;
-    --status-pending-bg: rgba(239, 68, 68, 0.1);
-    --status-resolved-bg: rgba(52, 211, 153, 0.1);
-  }
+  --status-pending: #f87171;
+  --status-resolved: #34d399;
+  --status-pending-bg: rgba(239, 68, 68, 0.1);
+  --status-resolved-bg: rgba(52, 211, 153, 0.1);
 }
 
 @theme inline {

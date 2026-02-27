@@ -31,10 +31,10 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Protect driver dashboard
-  if (pathname.startsWith("/driver/dashboard") && !user) {
+  // Protect supervisor dashboard
+  if (pathname.startsWith("/supervisor/dashboard") && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/driver";
+    url.pathname = "/supervisor";
     return NextResponse.redirect(url);
   }
 
