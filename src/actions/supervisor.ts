@@ -13,23 +13,33 @@ export async function resolveIncident(formData: FormData) {
   const photo = formData.get("photo") as File;
 
   if (!incidentId || !supervisorLat || !supervisorLng || !photo) {
-    return { error: "Incident ID, GPS coordinates, and clearance photo are required." };
+    return {
+      error: "Incident ID, GPS coordinates, and clearance photo are required.",
+    };
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Authentication required." };
   }
 
-  const { data: isNearby } = await serviceClient.rpc("validate_driver_proximity", {
-    p_incident_id: incidentId,
-    p_driver_lat: supervisorLat,
-    p_driver_lng: supervisorLng,
-    p_max_distance_meters: DRIVER_CLEARANCE_RADIUS_M,
-  });
+  const { data: isNearby } = await serviceClient.rpc(
+    "validate_driver_proximity",
+    {
+      p_incident_id: incidentId,
+      p_driver_lat: supervisorLat,
+      p_driver_lng: supervisorLng,
+      p_max_distance_meters: DRIVER_CLEARANCE_RADIUS_M,
+    },
+  );
 
-  if (!isNearby) {
-    return { error: "You are outside the allowed radius. Move closer to the incident location." };
+  if (!isNearby && process.env.DEMO_MODE !== "true") {
+    return {
+      error:
+        "You are outside the allowed radius. Move closer to the incident location.",
+    };
   }
 
   const fileName = `${Date.now()}-clearance-${Math.random().toString(36).slice(2)}.${photo.name.split(".").pop()}`;
@@ -44,7 +54,9 @@ export async function resolveIncident(formData: FormData) {
     return { error: "Failed to upload clearance photo." };
   }
 
-  const { data: { publicUrl } } = serviceClient.storage
+  const {
+    data: { publicUrl },
+  } = serviceClient.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(`clearances/${fileName}`);
 
@@ -60,7 +72,7 @@ export async function resolveIncident(formData: FormData) {
 
   const reportedAt = new Date(incident.reported_at);
   const responseTimeMinutes = Math.round(
-    (Date.now() - reportedAt.getTime()) / (1000 * 60)
+    (Date.now() - reportedAt.getTime()) / (1000 * 60),
   );
 
   const { error: updateError } = await serviceClient

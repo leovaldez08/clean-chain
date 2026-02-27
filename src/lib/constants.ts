@@ -5,7 +5,7 @@ export const MADURAI_CENTER = {
 } as const;
 
 // Geofence radius in kilometers (reports only allowed within this radius of city center)
-export const MADURAI_GEOFENCE_KM = 15;
+export const MADURAI_GEOFENCE_KM = 20;
 
 // Driver must be within this distance (meters) to clear an incident
 export const DRIVER_CLEARANCE_RADIUS_M = 100;

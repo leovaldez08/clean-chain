@@ -19,8 +19,8 @@ export async function submitReport(formData: FormData) {
     return { error: "Photo, latitude, and longitude are required." };
   }
 
-  // Validate Madurai geofence
-  if (!isWithinMadurai({ lat, lng })) {
+  // Validate Madurai geofence (bypass in demo mode)
+  if (process.env.DEMO_MODE !== "true" && !isWithinMadurai({ lat, lng })) {
     return { error: "Out of Zone: Reports are currently limited to the Madurai municipal limits." };
   }
 

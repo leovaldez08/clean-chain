@@ -1,0 +1,58 @@
+{
+  "LandingPage": {
+    "navFeatures": "Features",
+    "navImpact": "Impact",
+    "navWorkflow": "Workflow",
+    "liveInMadurai": "Live in Madurai",
+    "title": "Clean streets. Clear accountability.",
+    "subtitle": "Ward-level waste accountability for Madurai. Citizens report. Supervisors resolve. Admins monitors all in real-time.",
+    "startReporting": "Start Reporting",
+    "supervisorLogin": "Supervisor Login",
+    "adminDashboard": "Admin Dashboard",
+    "scroll": "Explore",
+
+    "featuresSubtitle": "How It Works",
+    "featuresTitle": "Three roles. One mission.",
+    "featuresDesc": "A complete waste accountability loop from citizen report to verified resolution.",
+    "featureSnapTitle": "Snap & Report",
+    "featureSnapDesc": "Citizens photograph waste issues with their phone. GPS coordinates are captured instantly.",
+    "featureGpsTitle": "GPS Verified",
+    "featureGpsDesc": "Every report is geotagged within 15km Madurai geofence using PostGIS validation.",
+    "featureProximityTitle": "Proximity Enforced",
+    "featureProximityDesc": "Supervisors must be within 100m of the incident location to submit clearance.",
+    "featureRealtimeTitle": "Real-time Updates",
+    "featureRealtimeDesc": "Admin dashboard updates instantly via Supabase Realtime. Zero page refreshes.",
+    "featureHeatmapTitle": "Heatmap Analytics",
+    "featureHeatmapDesc": "Identify waste hotspots across all 100 wards with interactive Leaflet heatmaps.",
+    "featureResponseTitle": "Response Tracking",
+    "featureResponseDesc": "Automatic response time computation from report to resolution. Full accountability.",
+
+    "impactSubtitle": "Real Impact",
+    "impactTitle": "Recently Resolved",
+    "impactDesc": "See how citizen reports turn into action. These incidents were recently addressed by our rapid response teams.",
+
+    "flowSubtitle": "The Flow",
+    "flowTitle": "Report → Resolve → Monitor",
+    "flowStep1Role": "Citizen",
+    "flowStep1Title": "Report waste",
+    "flowStep1Desc": "Open the app, snap a photo, and submit. GPS and device info are captured automatically. No login required.",
+    "flowStep2Role": "Supervisor",
+    "flowStep2Title": "Resolve at site",
+    "flowStep2Desc": "Supervisors see pending incidents. They must physically visit the spot and submit a clearance photo within 100m.",
+    "flowStep3Role": "Admin",
+    "flowStep3Title": "Monitor city-wide",
+    "flowStep3Desc": "Admins see real-time updates, heatmaps, response times, and ward-level analytics with before/after photos.",
+
+    "statsCovered": "Wards Covered",
+    "statsGpsAcc": "GPS Accuracy",
+    "statsRoles": "User Roles",
+    "statsLogin": "Login Required",
+
+    "ctaMainBold": "Every ward accountable.",
+    "ctaMainColor": "Every incident tracked.",
+    "ctaDesc": "CleanChain brings transparency to waste management in Madurai. Start reporting now — zero friction, maximum impact.",
+    "pwa": "PWA Installable",
+    "rolesys": "3 Role System",
+    "gpsver": "GPS Verified"
+  }
+}

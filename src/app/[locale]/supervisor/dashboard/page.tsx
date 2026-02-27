@@ -45,8 +45,41 @@ export default function SupervisorDashboard() {
   }, []);
 
   useEffect(() => {
-    loadIncidents();
+    Promise.resolve().then(() => loadIncidents());
   }, [loadIncidents]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("supervisor-incidents")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "incidents" },
+        (payload) => {
+          const inc = payload.new as Incident;
+          if (inc.status === "pending") {
+            setIncidents((prev) => [inc, ...prev]);
+            toast.info("🚨 New incident reported!", {
+              description:
+                inc.description?.slice(0, 80) || `Ward ${inc.ward_number}`,
+              duration: 8000,
+            });
+            try {
+              const audio = new Audio("/notification.mp3");
+              audio.volume = 0.5;
+              audio.play().catch(() => {});
+            } catch {
+              // audio not available
+            }
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const grabGPS = () => {
     setGpsLoading(true);
@@ -267,9 +300,12 @@ export default function SupervisorDashboard() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-white" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icons/icon-192.png"
+              alt="CleanChain"
+              className="w-8 h-8 rounded-lg"
+            />
             <div>
               <h1 className="font-bold text-sm">Supervisor Dashboard</h1>
               <p className="text-xs text-muted-foreground">

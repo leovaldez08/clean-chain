@@ -1,6 +1,11 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+} from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -17,21 +22,45 @@ import {
   Smartphone,
   Globe,
   CheckCircle2,
+  Menu,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useTranslations } from "next-intl";
+import type { Incident } from "@/lib/types";
+import { getRecentResolvedIncidents } from "@/actions/impact";
 
 /* ── Animated floating particles for hero background ── */
 function FloatingParticles() {
-  const [particles] = useState(() =>
-    Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 5,
-    })),
-  );
+  const [particles, setParticles] = useState<
+    {
+      id: number;
+      x: number;
+      y: number;
+      size: number;
+      duration: number;
+      delay: number;
+      driftX: number;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setParticles(
+        Array.from({ length: 40 }, (_, i) => ({
+          id: i,
+          x: Math.random() * 100,
+          y: Math.random() * 100,
+          size: Math.random() * 3 + 1,
+          duration: Math.random() * 20 + 15,
+          delay: Math.random() * 5,
+          driftX: Math.random() * 40 - 20,
+        })),
+      );
+    });
+  }, []);
+
+  if (particles.length === 0) return null;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -47,7 +76,7 @@ function FloatingParticles() {
           }}
           animate={{
             y: [0, -80, 0],
-            x: [0, Math.random() * 40 - 20, 0],
+            x: [0, p.driftX, 0],
             opacity: [0, 0.8, 0],
             scale: [0.5, 1.5, 0.5],
           }}
@@ -220,6 +249,7 @@ const staggerContainer = {
 /* ── Hero Section ── */
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations("LandingPage");
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -228,7 +258,8 @@ function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   const [typedText, setTypedText] = useState("");
-  const fullText = "Clean streets. Clear accountability.";
+  const fullText = t("title");
+  // const fullText = "Clean streets. Clear accountability.";
 
   useEffect(() => {
     let i = 0;
@@ -238,24 +269,20 @@ function HeroSection() {
       if (i >= fullText.length) clearInterval(interval);
     }, 45);
     return () => clearInterval(interval);
-  }, []);
+  }, [fullText]);
 
   return (
     <section
+      id="hero"
       ref={ref}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
       {/* Background layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-900" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-emerald-950 dark:via-slate-950 dark:to-slate-900" />
       <FloatingOrbs />
       <AnimatedGrid />
       <FloatingParticles />
       <ScanLine />
-
-      {/* Theme toggle */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle />
-      </div>
 
       <motion.div
         style={{ y, opacity }}
@@ -266,18 +293,18 @@ function HeroSection() {
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm mb-8 backdrop-blur-sm"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-medium text-sm mb-8 backdrop-blur-sm border-0 ring-0 shadow-none"
         >
           <motion.span
             className="w-2 h-2 rounded-full bg-emerald-500"
             animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
-          Live in Madurai
+          {t("liveInMadurai")}
         </motion.div>
 
         {/* Typed heading */}
-        <h1 className="text-4xl sm:text-6xl lg:text-8xl font-bold tracking-tight text-white leading-[0.95] min-h-[1.9em] sm:min-h-[2.1em]">
+        <h1 className="text-4xl sm:text-6xl lg:text-[5rem] font-extrabold tracking-normal md:tracking-wide text-slate-900 dark:text-white leading-[1.35] sm:leading-[1.25] min-h-[2.5em] sm:min-h-[2.4em] text-balance mx-auto">
           {typedText.split(". ").map((part, idx) =>
             idx === 0 ? (
               <span key={idx}>
@@ -307,11 +334,9 @@ function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.8, duration: 0.8 }}
-          className="mt-6 sm:mt-8 text-base sm:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed px-4"
+          className="mt-6 sm:mt-8 text-base sm:text-lg text-slate-500 max-w-2xl mx-auto leading-[1.8] tracking-wide px-4 dark:text-slate-400"
         >
-          Ward-level waste accountability for Madurai. Citizens report.
-          Supervisors resolve. Admins monitor — all in real-time with GPS
-          verification and photo evidence.
+          {t("subtitle")}
         </motion.p>
 
         <motion.div
@@ -325,22 +350,22 @@ function HeroSection() {
             className="group w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-2xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(16,185,129,0.4)] hover:scale-[1.02] cursor-pointer"
           >
             <Camera className="w-5 h-5" />
-            Report an Incident
+            {t("startReporting")}
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
             href="/supervisor"
-            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20 font-semibold rounded-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer backdrop-blur-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 shadow-md ring-1 ring-black/5 dark:ring-white/10 font-semibold rounded-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
           >
-            <Shield className="w-5 h-5" />
-            Supervisor Login
+            <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            {t("supervisorLogin")}
           </Link>
           <Link
             href="/admin"
-            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20 font-semibold rounded-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer backdrop-blur-sm"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white text-black hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 shadow-md ring-1 ring-black/5 dark:ring-white/10 font-semibold rounded-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
           >
-            <Eye className="w-5 h-5" />
-            Admin Dashboard
+            <Eye className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            {t("adminDashboard")}
           </Link>
         </motion.div>
       </motion.div>
@@ -353,7 +378,7 @@ function HeroSection() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
         <span className="text-xs text-slate-500 tracking-widest uppercase">
-          Scroll
+          {t("scroll")}
         </span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
@@ -367,54 +392,53 @@ function HeroSection() {
 }
 
 /* ── Features ── */
-const features = [
-  {
-    icon: Camera,
-    title: "Snap & Report",
-    description:
-      "Citizens photograph waste issues with their phone. GPS coordinates are captured instantly.",
-    color: "emerald",
-  },
-  {
-    icon: MapPin,
-    title: "GPS Verified",
-    description:
-      "Every report is geotagged within 15km Madurai geofence using PostGIS validation.",
-    color: "teal",
-  },
-  {
-    icon: Shield,
-    title: "Proximity Enforced",
-    description:
-      "Supervisors must be within 100m of the incident location to submit clearance.",
-    color: "cyan",
-  },
-  {
-    icon: Zap,
-    title: "Real-time Updates",
-    description:
-      "Admin dashboard updates instantly via Supabase Realtime. Zero page refreshes.",
-    color: "green",
-  },
-  {
-    icon: BarChart3,
-    title: "Heatmap Analytics",
-    description:
-      "Identify waste hotspots across all 100 wards with interactive Leaflet heatmaps.",
-    color: "emerald",
-  },
-  {
-    icon: Clock,
-    title: "Response Tracking",
-    description:
-      "Automatic response time computation from report to resolution. Full accountability.",
-    color: "teal",
-  },
-];
-
 function FeaturesSection() {
+  const t = useTranslations("LandingPage");
+
+  const translatedFeatures = [
+    {
+      icon: Camera,
+      title: t("featureSnapTitle"),
+      description: t("featureSnapDesc"),
+      color: "emerald",
+    },
+    {
+      icon: MapPin,
+      title: t("featureGpsTitle"),
+      description: t("featureGpsDesc"),
+      color: "teal",
+    },
+    {
+      icon: Shield,
+      title: t("featureProximityTitle"),
+      description: t("featureProximityDesc"),
+      color: "cyan",
+    },
+    {
+      icon: Zap,
+      title: t("featureRealtimeTitle"),
+      description: t("featureRealtimeDesc"),
+      color: "green",
+    },
+    {
+      icon: BarChart3,
+      title: t("featureHeatmapTitle"),
+      description: t("featureHeatmapDesc"),
+      color: "emerald",
+    },
+    {
+      icon: Clock,
+      title: t("featureResponseTitle"),
+      description: t("featureResponseDesc"),
+      color: "teal",
+    },
+  ];
+
   return (
-    <section className="py-20 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden">
+    <section
+      id="features"
+      className="py-20 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden"
+    >
       {/* Subtle background accent */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/[0.03] rounded-full blur-3xl pointer-events-none" />
 
@@ -431,22 +455,21 @@ function FeaturesSection() {
             custom={0}
             className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-4"
           >
-            How It Works
+            {t("featuresSubtitle")}
           </motion.p>
           <motion.h2
             variants={fadeUp}
             custom={1}
-            className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground"
+            className="text-3xl sm:text-5xl font-bold tracking-normal md:tracking-wide text-foreground leading-[1.3]"
           >
-            Three roles. One mission.
+            {t("featuresTitle")}
           </motion.h2>
           <motion.p
             variants={fadeUp}
             custom={2}
             className="mt-4 text-muted-foreground text-base sm:text-lg max-w-xl mx-auto"
           >
-            A complete waste accountability loop from citizen report to verified
-            resolution.
+            {t("featuresDesc")}
           </motion.p>
         </motion.div>
 
@@ -457,7 +480,7 @@ function FeaturesSection() {
           variants={staggerContainer}
           className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
         >
-          {features.map((feature, i) => (
+          {translatedFeatures.map((feature, i) => (
             <motion.div
               key={feature.title}
               variants={fadeUp}
@@ -486,36 +509,38 @@ function FeaturesSection() {
 }
 
 /* ── Workflow ── */
-const steps = [
-  {
-    step: "01",
-    icon: Smartphone,
-    role: "Citizen",
-    title: "Report waste",
-    description:
-      "Open the app, snap a photo, and submit. GPS and device info are captured automatically. No login required.",
-  },
-  {
-    step: "02",
-    icon: Shield,
-    role: "Supervisor",
-    title: "Resolve at site",
-    description:
-      "Supervisors see pending incidents. They must physically visit the spot and submit a clearance photo within 100m.",
-  },
-  {
-    step: "03",
-    icon: BarChart3,
-    role: "Admin",
-    title: "Monitor city-wide",
-    description:
-      "Admins see real-time updates, heatmaps, response times, and ward-level analytics with before/after photos.",
-  },
-];
-
 function WorkflowSection() {
+  const t = useTranslations("LandingPage");
+
+  const translatedSteps = [
+    {
+      step: "01",
+      icon: Smartphone,
+      role: t("flowStep1Role"),
+      title: t("flowStep1Title"),
+      description: t("flowStep1Desc"),
+    },
+    {
+      step: "02",
+      icon: Shield,
+      role: t("flowStep2Role"),
+      title: t("flowStep2Title"),
+      description: t("flowStep2Desc"),
+    },
+    {
+      step: "03",
+      icon: BarChart3,
+      role: t("flowStep3Role"),
+      title: t("flowStep3Title"),
+      description: t("flowStep3Desc"),
+    },
+  ];
+
   return (
-    <section className="py-20 sm:py-32 px-4 sm:px-6 relative overflow-hidden">
+    <section
+      id="workflow"
+      className="py-20 sm:py-32 px-4 sm:px-6 relative overflow-hidden"
+    >
       <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-950/5 dark:via-emerald-950/10 to-background" />
 
       <div className="max-w-5xl mx-auto relative">
@@ -531,14 +556,14 @@ function WorkflowSection() {
             custom={0}
             className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-4"
           >
-            The Flow
+            {t("flowSubtitle")}
           </motion.p>
           <motion.h2
             variants={fadeUp}
             custom={1}
-            className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground"
+            className="text-3xl sm:text-5xl font-bold tracking-normal md:tracking-wide text-foreground leading-[1.3]"
           >
-            Report → Resolve → Monitor
+            {t("flowTitle")}
           </motion.h2>
         </motion.div>
 
@@ -546,7 +571,7 @@ function WorkflowSection() {
         <div className="hidden sm:block absolute left-8 top-[220px] bottom-20 w-px bg-gradient-to-b from-emerald-500/20 via-emerald-500/10 to-transparent" />
 
         <div className="space-y-6 sm:space-y-8">
-          {steps.map((step, i) => (
+          {translatedSteps.map((step, i) => (
             <motion.div
               key={step.step}
               initial={{ opacity: 0, x: -40 }}
@@ -587,72 +612,6 @@ function WorkflowSection() {
             </motion.div>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Tech Stack ── */
-const techStack = [
-  { name: "Next.js 14", description: "App Router + Server Actions" },
-  { name: "Supabase", description: "Auth, Storage, Realtime, PostGIS" },
-  { name: "Leaflet", description: "Maps + Heatmaps" },
-  { name: "Tailwind CSS", description: "Utility-first styling" },
-  { name: "shadcn/ui", description: "Accessible components" },
-  { name: "Vercel", description: "Edge deployment" },
-];
-
-function TechSection() {
-  return (
-    <section className="py-20 sm:py-32 px-4 sm:px-6 bg-background">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="text-center mb-12 sm:mb-16"
-        >
-          <motion.p
-            variants={fadeUp}
-            custom={0}
-            className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-4"
-          >
-            Built With
-          </motion.p>
-          <motion.h2
-            variants={fadeUp}
-            custom={1}
-            className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground"
-          >
-            Production-grade stack
-          </motion.h2>
-        </motion.div>
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={staggerContainer}
-          className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4"
-        >
-          {techStack.map((tech, i) => (
-            <motion.div
-              key={tech.name}
-              variants={fadeUp}
-              custom={i}
-              whileHover={{ y: -4, scale: 1.03 }}
-              className="p-5 sm:p-6 rounded-2xl border border-border bg-card hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group"
-            >
-              <h3 className="font-semibold text-sm text-foreground group-hover:text-emerald-500 transition-colors">
-                {tech.name}
-              </h3>
-              <p className="text-muted-foreground text-xs mt-1">
-                {tech.description}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
@@ -701,14 +660,15 @@ function AnimatedCounter({
   );
 }
 
-const stats = [
-  { value: 100, label: "Wards Covered", suffix: "" },
-  { value: 50, label: "GPS Accuracy", suffix: "m" },
-  { value: 3, label: "User Roles", suffix: "" },
-  { value: 0, label: "Login Required", suffix: "" },
-];
-
 function StatsSection() {
+  const t = useTranslations("LandingPage");
+  const translatedStats = [
+    { value: 100, label: t("statsCovered"), suffix: "" },
+    { value: 75, label: t("statsGpsAcc"), suffix: "m" },
+    { value: 3, label: t("statsRoles"), suffix: "" },
+    { value: 0, label: t("statsLogin"), suffix: "" },
+  ];
+
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 bg-emerald-500 relative overflow-hidden">
       <motion.div
@@ -728,7 +688,7 @@ function StatsSection() {
           variants={staggerContainer}
           className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8"
         >
-          {stats.map((stat, i) => (
+          {translatedStats.map((stat, i) => (
             <motion.div
               key={stat.label}
               variants={fadeUp}
@@ -755,6 +715,8 @@ function StatsSection() {
 
 /* ── CTA ── */
 function CTASection() {
+  const t = useTranslations("LandingPage");
+
   return (
     <section className="py-20 sm:py-32 px-4 sm:px-6 bg-background relative overflow-hidden">
       <div className="absolute inset-0">
@@ -779,19 +741,18 @@ function CTASection() {
         <motion.h2
           variants={fadeUp}
           custom={1}
-          className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground"
+          className="text-3xl sm:text-5xl font-bold tracking-normal md:tracking-wide leading-[1.3] text-foreground"
         >
-          Every ward accountable.
+          {t("ctaMainBold")}
           <br />
-          <span className="text-emerald-500">Every incident tracked.</span>
+          <span className="text-emerald-500">{t("ctaMainColor")}</span>
         </motion.h2>
         <motion.p
           variants={fadeUp}
           custom={2}
           className="mt-6 text-muted-foreground text-base sm:text-lg max-w-xl mx-auto"
         >
-          CleanChain brings transparency to waste management in Madurai. Start
-          reporting now — zero friction, maximum impact.
+          {t("ctaDesc")}
         </motion.p>
         <motion.div variants={fadeUp} custom={3} className="mt-8 sm:mt-10">
           <Link
@@ -799,7 +760,7 @@ function CTASection() {
             className="group inline-flex items-center gap-3 px-8 sm:px-10 py-4 sm:py-5 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-2xl text-base sm:text-lg transition-all duration-300 hover:shadow-[0_0_60px_rgba(16,185,129,0.3)] hover:scale-[1.03] cursor-pointer"
           >
             <Camera className="w-5 sm:w-6 h-5 sm:h-6" />
-            Start Reporting
+            {t("startReporting")}
             <ArrowRight className="w-4 sm:w-5 h-4 sm:h-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>
@@ -809,17 +770,17 @@ function CTASection() {
         <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
-            <span>PWA Installable</span>
+            <span>{t("pwa")}</span>
           </div>
           <span className="text-border hidden sm:block">|</span>
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4" />
-            <span>3 Role System</span>
+            <span>{t("rolesys")}</span>
           </div>
           <span className="text-border hidden sm:block">|</span>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4" />
-            <span>GPS Verified</span>
+            <span>{t("gpsver")}</span>
           </div>
         </div>
       </div>
@@ -827,15 +788,283 @@ function CTASection() {
   );
 }
 
+/* ── Impact Section ── */
+function ImpactSection() {
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const t = useTranslations("LandingPage");
+
+  useEffect(() => {
+    async function load() {
+      const { data } = await getRecentResolvedIncidents();
+      if (data) setIncidents(data as Incident[]);
+    }
+    load();
+  }, []);
+
+  if (incidents.length === 0) return null;
+
+  return (
+    <section
+      id="impact"
+      className="py-20 sm:py-32 px-4 sm:px-6 bg-muted/20 relative overflow-hidden border-y border-border"
+    >
+      <div className="max-w-6xl mx-auto relative">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={staggerContainer}
+          className="text-center mb-16"
+        >
+          <motion.p
+            variants={fadeUp}
+            custom={0}
+            className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-4"
+          >
+            {t("impactSubtitle")}
+          </motion.p>
+          <motion.h2
+            variants={fadeUp}
+            custom={1}
+            className="text-3xl sm:text-5xl font-bold tracking-normal md:tracking-wide text-foreground leading-[1.3]"
+          >
+            {t("impactTitle")}
+          </motion.h2>
+          <motion.p
+            variants={fadeUp}
+            custom={2}
+            className="mt-4 text-muted-foreground text-base sm:text-lg max-w-xl mx-auto"
+          >
+            {t("impactDesc")}
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-40px" }}
+          variants={staggerContainer}
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+        >
+          {incidents.map((inc, i) => (
+            <motion.div
+              key={inc.id}
+              variants={fadeUp}
+              custom={i}
+              className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-lg hover:border-emerald-500/30 transition-all duration-300 group"
+            >
+              <div className="relative h-48 w-full border-b border-border flex">
+                <div className="w-1/2 h-full relative border-r border-border/50 overflow-hidden">
+                  <span className="absolute top-2 left-2 px-2 py-1 bg-black/60 text-white text-[10px] font-bold rounded shadow backdrop-blur-md z-10 w-fit">
+                    Before
+                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={inc.photo_url}
+                    alt="Before"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="w-1/2 h-full relative overflow-hidden">
+                  <span className="absolute top-2 right-2 px-2 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded shadow backdrop-blur-md z-10 w-fit">
+                    After
+                  </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={inc.clearance_photo_url || undefined}
+                    alt="After"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-3 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-500" /> Ward{" "}
+                    {inc.ward_number || "City"}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 px-2 py-1 rounded">
+                    <Clock className="w-3.5 h-3.5" />{" "}
+                    {inc.response_time_minutes}m response
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-foreground line-clamp-2 mt-2">
+                  {inc.description ||
+                    "Waste accumulation cleared from public area."}
+                </p>
+                <div className="mt-4 text-[10px] text-muted-foreground uppercase tracking-widest border-t border-border pt-4 text-center">
+                  Resolved on{" "}
+                  {inc.resolved_at
+                    ? new Date(inc.resolved_at).toLocaleDateString()
+                    : "—"}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Navbar ── */
+const SCROLL_TRIGGER = 80;
+const SCROLL_RELEASE = 50;
+
+function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const t = useTranslations("LandingPage");
+
+  useMotionValueEvent(scrollY, "change", (y) => {
+    setIsScrolled((prev) => {
+      if (!prev && y > SCROLL_TRIGGER) return true;
+      if (prev && y < SCROLL_RELEASE) return false;
+      return prev;
+    });
+  });
+
+  const scrollTo = (id: string) => {
+    setMenuOpen(false);
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <header className="fixed top-4 md:top-6 w-full z-50 px-4 sm:px-6 pointer-events-none">
+      <nav className="mx-auto max-w-7xl pointer-events-auto flex justify-center">
+        {/* Floating Island */}
+        <motion.div
+          animate={{
+            y: isScrolled ? -8 : 0,
+            maxWidth: isScrolled ? 960 : 1024,
+            borderRadius: isScrolled ? 9999 : 24,
+          }}
+          style={{
+            backgroundColor: isScrolled
+              ? "rgba(15, 23, 42, 0.55)"
+              : "transparent",
+            backdropFilter: isScrolled
+              ? "saturate(180%) blur(24px)"
+              : "blur(0px)",
+            WebkitBackdropFilter: isScrolled
+              ? "saturate(180%) blur(24px)"
+              : "none",
+            boxShadow: isScrolled
+              ? "0 0.5px 0 0 rgba(255,255,255,0.08), 0 20px 50px -15px rgba(0,0,0,0.35)"
+              : "none",
+            transition: "padding 300ms ease-out, height 300ms ease-out",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 35,
+          }}
+          className={`flex items-center justify-between w-full will-change-transform ${
+            isScrolled
+              ? "px-5 sm:px-8 h-14 border-none"
+              : "px-4 sm:px-6 h-16 border-none"
+          }`}
+        >
+          {/* Logo */}
+          <div
+            className="flex items-center gap-3 shrink-0 group cursor-pointer"
+            onClick={() => scrollTo("hero")}
+          >
+            <motion.div
+              animate={{ scale: isScrolled ? 0.9 : 1 }}
+              transition={{ duration: 0.25 }}
+              className="relative w-12 h-12 sm:w-11 sm:h-11 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icons/icon-512.png"
+                alt="CleanChain"
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+            <span className="font-extrabold text-xl tracking-tight hidden sm:block bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+              CleanChain
+            </span>
+          </div>
+
+          {/* Desktop Nav */}
+          <div
+            className={`hidden md:flex items-center transition-[gap,opacity] duration-300 ${
+              isScrolled
+                ? "gap-6 opacity-90 hover:opacity-100"
+                : "gap-10 opacity-100"
+            }`}
+          >
+            {[
+              { label: t("navFeatures"), id: "features" },
+              { label: t("navImpact"), id: "impact" },
+              { label: t("navWorkflow"), id: "workflow" },
+            ].map((link) => (
+              <button
+                key={link.id}
+                onClick={() => scrollTo(link.id)}
+                className="text-xs sm:text-sm font-bold uppercase tracking-wide transition-colors opacity-80 hover:opacity-100 text-slate-200 hover:text-white whitespace-nowrap"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Actions & Toggles */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <LanguageToggle />
+            <ThemeToggle />
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl transition-colors text-slate-200 bg-white/5 hover:bg-white/10"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </motion.div>
+      </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="fixed top-24 left-4 right-4 md:hidden pointer-events-auto bg-background/95 backdrop-blur-2xl border border-border/50 shadow-2xl rounded-3xl p-6 flex flex-col gap-6"
+        >
+          <div className="flex flex-col gap-4">
+            {[
+              { label: t("navFeatures"), id: "features" },
+              { label: t("navImpact"), id: "impact" },
+              { label: t("navWorkflow"), id: "workflow" },
+            ].map((link) => (
+              <button
+                key={link.id}
+                onClick={() => scrollTo(link.id)}
+                className="text-left font-bold text-lg text-foreground p-3 rounded-2xl hover:bg-muted transition-colors bg-foreground/5 border border-foreground/5"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </header>
+  );
+}
+
 /* ── Main Page ── */
 export default function LandingPage() {
   return (
-    <main className="bg-background text-foreground">
+    <main className="bg-background text-foreground relative overflow-x-hidden">
+      <Navbar />
       <HeroSection />
       <FeaturesSection />
-      <WorkflowSection />
       <StatsSection />
-      <TechSection />
+      <ImpactSection />
+      <WorkflowSection />
       <CTASection />
     </main>
   );
