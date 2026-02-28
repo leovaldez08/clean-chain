@@ -14,8 +14,8 @@ export function ThemeToggle({ isScrolled }: { isScrolled?: boolean }) {
 
   const baseClasses =
     isScrolled === false
-      ? "bg-white/10 hover:bg-white/20 text-white ring-white/10"
-      : "bg-slate-900/5 hover:bg-slate-900/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 ring-slate-900/5 dark:ring-white/5";
+      ? "bg-black/5 hover:bg-black/10 text-slate-800 ring-slate-900/5 dark:bg-white/5 dark:hover:bg-white/10 dark:text-slate-200 dark:ring-white/5"
+      : "bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-slate-800 dark:text-slate-200 ring-slate-900/5 dark:ring-white/5";
 
   return (
     <button

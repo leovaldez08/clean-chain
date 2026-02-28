@@ -62,7 +62,6 @@ export async function getWardLeaderboard(): Promise<{
         )
       : 0;
 
-    // Demo-friendly Clean Score computation
     // We want the score to react positively when things are resolved
     const resolution_rate =
       total_incidents > 0 ? resolved_count / total_incidents : 1;
@@ -76,7 +75,6 @@ export async function getWardLeaderboard(): Promise<{
 
     const clean_score = Math.max(0, Math.min(100, Math.round(score)));
 
-    // For a highly interactive demo, we want the trend to reflect the real-time resolution speed.
     // If resolution rate > 50%, trend is up. If < 30%, trend is down.
     const trend: "up" | "down" | "stable" =
       resolution_rate > 0.5 ? "up" : resolution_rate < 0.3 ? "down" : "stable";
@@ -115,7 +113,7 @@ export async function getRecurringHotspots(): Promise<{
   if (!incidents || incidents.length === 0) return { data: [], error: null };
 
   // Cluster incidents within ~50m radius
-  const CLUSTER_RADIUS_DEG = 0.00045; // ~50m
+  const CLUSTER_RADIUS_DEG = 0.00045;
   const clusters: {
     lat: number;
     lng: number;

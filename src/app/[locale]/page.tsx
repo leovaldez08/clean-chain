@@ -109,7 +109,7 @@ function AnimatedGrid() {
             y1="0%"
             x2={`${(i + 1) * 8}%`}
             y2="100%"
-            stroke="rgba(52, 211, 153, 0.05)"
+            stroke="rgba(16, 185, 129, 0.15)"
             strokeWidth="1"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
@@ -124,7 +124,7 @@ function AnimatedGrid() {
             y1={`${(i + 1) * 12}%`}
             x2="100%"
             y2={`${(i + 1) * 12}%`}
-            stroke="rgba(52, 211, 153, 0.04)"
+            stroke="rgba(16, 185, 129, 0.15)"
             strokeWidth="1"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
@@ -279,7 +279,7 @@ function HeroSection() {
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
       {/* Background layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-emerald-950 dark:via-slate-950 dark:to-slate-900" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50/50 to-teal-50 dark:from-emerald-950 dark:via-slate-950 dark:to-slate-900" />
       <FloatingOrbs />
       <AnimatedGrid />
       <FloatingParticles />
@@ -942,17 +942,11 @@ function Navbar() {
             borderRadius: isScrolled ? 9999 : 24,
           }}
           style={{
-            backgroundColor: isScrolled
-              ? "rgba(15, 23, 42, 0.55)"
-              : "transparent",
             backdropFilter: isScrolled
               ? "saturate(180%) blur(24px)"
               : "blur(0px)",
             WebkitBackdropFilter: isScrolled
               ? "saturate(180%) blur(24px)"
-              : "none",
-            boxShadow: isScrolled
-              ? "0 0.5px 0 0 rgba(255,255,255,0.08), 0 20px 50px -15px rgba(0,0,0,0.35)"
               : "none",
             transition: "padding 300ms ease-out, height 300ms ease-out",
           }}
@@ -961,10 +955,10 @@ function Navbar() {
             stiffness: 300,
             damping: 35,
           }}
-          className={`flex items-center justify-between w-full will-change-transform ${
+          className={`flex items-center justify-between w-full will-change-transform transition-[background-color,box-shadow] duration-300 ${
             isScrolled
-              ? "px-5 sm:px-8 h-14 border-none"
-              : "px-4 sm:px-6 h-16 border-none"
+              ? "px-5 sm:px-8 h-14 border-none bg-white/80 dark:bg-slate-900/55 shadow-lg shadow-black/5 dark:shadow-[0_0.5px_0_0_rgba(255,255,255,0.08),0_20px_50px_-15px_rgba(0,0,0,0.35)]"
+              : "px-4 sm:px-6 h-16 border-none bg-transparent"
           }`}
         >
           {/* Logo */}
@@ -1005,7 +999,7 @@ function Navbar() {
               <button
                 key={link.id}
                 onClick={() => scrollTo(link.id)}
-                className="text-xs sm:text-sm font-bold uppercase tracking-wide transition-colors opacity-80 hover:opacity-100 text-slate-200 hover:text-white whitespace-nowrap"
+                className="text-xs sm:text-sm font-bold uppercase tracking-wide transition-colors opacity-80 hover:opacity-100 text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white whitespace-nowrap"
               >
                 {link.label}
               </button>
@@ -1019,7 +1013,7 @@ function Navbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl transition-colors text-slate-200 bg-white/5 hover:bg-white/10"
+              className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl transition-colors text-slate-800 bg-black/5 hover:bg-black/10 dark:text-slate-200 dark:bg-white/5 dark:hover:bg-white/10"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               <Menu className="w-5 h-5" />
