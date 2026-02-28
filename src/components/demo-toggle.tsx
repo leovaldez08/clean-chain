@@ -21,8 +21,10 @@ export function DemoToggle() {
       ? cookieState.split("=")[1] === "true"
       : process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
-    setIsDemo(initialValue);
-    setMounted(true);
+    setTimeout(() => {
+      setIsDemo(initialValue);
+      setMounted(true);
+    }, 0);
   }, []);
 
   const handleToggle = async (checked: boolean) => {
