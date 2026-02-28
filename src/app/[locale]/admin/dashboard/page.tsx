@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { getIncidents, getMetrics } from "@/actions/admin";
@@ -57,8 +57,8 @@ const IncidentMap = dynamic(() => import("@/components/incident-map"), {
 
 const WARD_NAMES: Record<number, string> = {
   12: "Meenakshi Temple Zone",
+  24: "Periyar Bus Stand Zone",
   45: "Anna Nagar Zone",
-  68: "Bypass Road Zone",
 };
 
 export default function AdminDashboard() {
@@ -79,6 +79,21 @@ export default function AdminDashboard() {
   >([]);
   const [now] = useState(() => Date.now());
   const router = useRouter();
+
+  const groupedHotspots = useMemo(() => {
+    const map = new Map<number, RecurringHotspot>();
+    hotspots.forEach((h) => {
+      const key = h.ward_number || 0;
+      if (!map.has(key)) {
+        map.set(key, { ...h });
+      } else {
+        map.get(key)!.incident_count += h.incident_count;
+      }
+    });
+    return Array.from(map.values()).sort(
+      (a, b) => b.incident_count - a.incident_count,
+    );
+  }, [hotspots]);
 
   const loadData = useCallback(async () => {
     const [
@@ -708,14 +723,14 @@ export default function AdminDashboard() {
         )}
 
         {/* Recurring Hotspots */}
-        {hotspots.length > 0 && (
+        {groupedHotspots.length > 0 && (
           <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
             <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-red-500">
               <Flame className="w-4 h-4" />
-              Recurring Hotspot Zones ({hotspots.length})
+              Recurring Hotspot Zones ({groupedHotspots.length})
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {hotspots.map((h, idx) => (
+              {groupedHotspots.map((h, idx) => (
                 <div
                   key={idx}
                   className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-red-500/10"

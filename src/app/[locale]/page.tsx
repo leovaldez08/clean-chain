@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
+import { Footer } from "@/components/footer"; // Added this import
 import { useTranslations } from "next-intl";
 import type { Incident } from "@/lib/types";
 import { getRecentResolvedIncidents } from "@/actions/impact";
@@ -1014,7 +1015,7 @@ function Navbar() {
           {/* Actions & Toggles */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <LanguageToggle />
-            <ThemeToggle />
+            <ThemeToggle isScrolled={isScrolled} />
 
             {/* Mobile Menu Button */}
             <button
@@ -1066,6 +1067,7 @@ export default function LandingPage() {
       <ImpactSection />
       <WorkflowSection />
       <CTASection />
+      <Footer />
     </main>
   );
 }

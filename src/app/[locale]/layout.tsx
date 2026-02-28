@@ -7,6 +7,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { ServiceWorkerRegistrar } from "@/components/sw-registrar";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -97,6 +98,7 @@ export default async function RootLayout({
           <ThemeProvider>{children}</ThemeProvider>
         </NextIntlClientProvider>
         <ServiceWorkerRegistrar />
+        <PwaInstallPrompt />
         <Toaster
           position="top-center"
           richColors

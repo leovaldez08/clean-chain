@@ -38,6 +38,17 @@ export default function CitizenPage() {
   const [impactLoading, setImpactLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // DEMO MODE STATE
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  const [demoWard, setDemoWard] = useState<number | "">("");
+
+  const DEMO_WARDS: Record<number, { name: string; lat: number; lng: number }> =
+    {
+      12: { name: "Ward 12 - Meenakshi Temple", lat: 9.9195, lng: 78.1193 },
+      24: { name: "Ward 24 - Periyar Bus Stand", lat: 9.9272, lng: 78.1268 },
+      45: { name: "Ward 45 - Anna Nagar", lat: 9.9282, lng: 78.145 },
+    };
+
   const loadImpact = useCallback(async () => {
     setImpactLoading(true);
     try {
@@ -312,7 +323,7 @@ export default function CitizenPage() {
             ) : (
               <button
                 onClick={grabGPS}
-                disabled={gpsLoading}
+                disabled={gpsLoading || (isDemoMode && demoWard !== "")}
                 className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
               >
                 {gpsLoading ? (
@@ -327,6 +338,49 @@ export default function CitizenPage() {
                   </>
                 )}
               </button>
+            )}
+
+            {/* DEMO MODE OVERRIDE */}
+            {isDemoMode && (
+              <div className="mt-4 p-4 rounded-xl border-2 border-primary/20 bg-primary/5 animate-fade-in">
+                <label className="text-xs font-bold text-primary mb-2 flex flex-col">
+                  <span className="flex items-center gap-1 uppercase tracking-wider mb-1">
+                    <Sparkles className="w-3.5 h-3.5" /> Demo Override
+                  </span>
+                  <span className="text-muted-foreground font-normal">
+                    Select a pilot ward directly to spoof GPS location for
+                    presentation.
+                  </span>
+                </label>
+                <select
+                  value={demoWard}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") {
+                      setDemoWard("");
+                      setCoords(null);
+                    } else {
+                      const wardId = parseInt(val);
+                      setDemoWard(wardId);
+                      setCoords({
+                        lat: DEMO_WARDS[wardId].lat,
+                        lng: DEMO_WARDS[wardId].lng,
+                      });
+                      toast.success(
+                        `Demo GPS locked to ${DEMO_WARDS[wardId].name}`,
+                      );
+                    }
+                  }}
+                  className="w-full mt-2 p-3 rounded-lg border border-border bg-background text-sm cursor-pointer outline-none focus:ring-2 focus:ring-primary/50"
+                >
+                  <option value="">-- Let Browser Grab Real GPS --</option>
+                  {Object.entries(DEMO_WARDS).map(([id, info]) => (
+                    <option key={id} value={id}>
+                      {info.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
           </section>
 
