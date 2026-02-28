@@ -90,8 +90,12 @@ export async function submitReport(formData: FormData) {
     .from(STORAGE_BUCKET)
     .getPublicUrl(`reports/${fileName}`);
 
-  // Estimate ward number
-  const wardNumber = estimateWardNumber({ lat, lng });
+  // Check for demo forced ward
+  const forcedWardStr = formData.get("forcedWard") as string | null;
+  const forcedWard = forcedWardStr ? parseInt(forcedWardStr, 10) : null;
+
+  // Estimate ward number or use strictly selected demo ward
+  const wardNumber = forcedWard || estimateWardNumber({ lat, lng });
 
   // Insert incident
   const { error: insertError } = await serviceClient.from("incidents").insert({
