@@ -37,30 +37,24 @@ export function getDeviceInfo(): string {
   return `${platform} | ${ua.slice(0, 120)}`;
 }
 
-// Simplified ward estimation for Madurai (100 wards)
-// Uses nearest-center lookup from a set of approximate ward centers
-// For MVP: divides Madurai into a grid and assigns ward numbers
-const WARD_GRID_SIZE = 10; // 10x10 grid = 100 wards
-const MADURAI_BOUNDS = {
-  minLat: 9.85,
-  maxLat: 9.99,
-  minLng: 78.04,
-  maxLng: 78.20,
-};
+const PILOT_WARDS = [
+  { id: 12, lat: 9.9195, lng: 78.1193 }, // Meenakshi Temple
+  { id: 24, lat: 9.9272, lng: 78.1268 }, // Periyar Bus Stand
+  { id: 45, lat: 9.9282, lng: 78.145 }, // Anna Nagar
+];
 
-/** Estimate ward number from coordinates (simplified grid-based approach) */
+/** Estimate ward number from coordinates (snaps to closest pilot ward) */
 export function estimateWardNumber(coords: Coordinates): number {
-  const latRange = MADURAI_BOUNDS.maxLat - MADURAI_BOUNDS.minLat;
-  const lngRange = MADURAI_BOUNDS.maxLng - MADURAI_BOUNDS.minLng;
+  let closestWard = 12;
+  let minDistance = Infinity;
 
-  const latIdx = Math.min(
-    WARD_GRID_SIZE - 1,
-    Math.max(0, Math.floor(((coords.lat - MADURAI_BOUNDS.minLat) / latRange) * WARD_GRID_SIZE))
-  );
-  const lngIdx = Math.min(
-    WARD_GRID_SIZE - 1,
-    Math.max(0, Math.floor(((coords.lng - MADURAI_BOUNDS.minLng) / lngRange) * WARD_GRID_SIZE))
-  );
+  for (const ward of PILOT_WARDS) {
+    const dist = haversineDistance(coords, { lat: ward.lat, lng: ward.lng });
+    if (dist < minDistance) {
+      minDistance = dist;
+      closestWard = ward.id;
+    }
+  }
 
-  return latIdx * WARD_GRID_SIZE + lngIdx + 1; // 1-100
+  return closestWard;
 }
