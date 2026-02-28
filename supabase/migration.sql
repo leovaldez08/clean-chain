@@ -128,3 +128,11 @@ BEGIN
   RETURN report_count;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 11. Enable Realtime Replication for the incidents table
+-- This allows the admin dashboard to receive live INSERT/UPDATE postgres_changes events without reloading.
+BEGIN;
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  CREATE PUBLICATION supabase_realtime;
+COMMIT;
+ALTER PUBLICATION supabase_realtime ADD TABLE incidents;

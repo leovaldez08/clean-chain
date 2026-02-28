@@ -20,35 +20,55 @@ export async function submitReport(formData: FormData) {
   }
 
   // Validate Madurai geofence (bypass in demo mode)
-  if (process.env.DEMO_MODE !== "true" && !isWithinMadurai({ lat, lng })) {
-    return { error: "Out of Zone: Reports are currently limited to the Madurai municipal limits." };
+  if (
+    process.env.NEXT_PUBLIC_DEMO_MODE !== "true" &&
+    !isWithinMadurai({ lat, lng })
+  ) {
+    return {
+      error:
+        "Out of Zone: Reports are currently limited to the Madurai municipal limits.",
+    };
   }
 
   // Get current anonymous user
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const userId = user?.id;
 
   // Rate limiting (3 per hour)
   if (userId) {
-    const { data: countData } = await serviceClient.rpc("count_recent_reports", {
-      p_user_id: userId,
-      p_hours: 1,
-    });
+    const { data: countData } = await serviceClient.rpc(
+      "count_recent_reports",
+      {
+        p_user_id: userId,
+        p_hours: 1,
+      },
+    );
     if (countData !== null && countData >= MAX_REPORTS_PER_HOUR) {
-      return { error: `Rate limit exceeded. Maximum ${MAX_REPORTS_PER_HOUR} reports per hour.` };
+      return {
+        error: `Rate limit exceeded. Maximum ${MAX_REPORTS_PER_HOUR} reports per hour.`,
+      };
     }
   }
 
   // Check nearby duplicates
-  const { data: hasDuplicate } = await serviceClient.rpc("check_nearby_duplicate", {
-    p_lat: lat,
-    p_lng: lng,
-    p_radius_meters: 30,
-    p_hours: 2,
-  });
+  const { data: hasDuplicate } = await serviceClient.rpc(
+    "check_nearby_duplicate",
+    {
+      p_lat: lat,
+      p_lng: lng,
+      p_radius_meters: 30,
+      p_hours: 2,
+    },
+  );
 
   if (hasDuplicate) {
-    return { warning: "A similar incident has already been reported nearby in the last 2 hours.", duplicate: true };
+    return {
+      warning:
+        "A similar incident has already been reported nearby in the last 2 hours.",
+      duplicate: true,
+    };
   }
 
   // Upload photo to Supabase Storage
@@ -64,7 +84,9 @@ export async function submitReport(formData: FormData) {
     return { error: "Failed to upload photo. Please try again." };
   }
 
-  const { data: { publicUrl } } = serviceClient.storage
+  const {
+    data: { publicUrl },
+  } = serviceClient.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(`reports/${fileName}`);
 

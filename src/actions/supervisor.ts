@@ -35,7 +35,7 @@ export async function resolveIncident(formData: FormData) {
     },
   );
 
-  if (!isNearby && process.env.DEMO_MODE !== "true") {
+  if (!isNearby && process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
     return {
       error:
         "You are outside the allowed radius. Move closer to the incident location.",
@@ -94,14 +94,34 @@ export async function resolveIncident(formData: FormData) {
 }
 
 export async function getNearbyPendingIncidents() {
+  const supabase = await createClient();
   const serviceClient = createServiceClient();
 
-  const { data, error } = await serviceClient
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not authenticated", data: null };
+  }
+
+  // Extract ward number from email (e.g. ward12supervisor@cleanchain.in -> 12)
+  const email = user.email || "";
+  const wardMatch = email.match(/ward(\d+)/i);
+  const wardNumber = wardMatch ? parseInt(wardMatch[1], 10) : null;
+
+  let query = serviceClient
     .from("incidents")
     .select("*")
     .eq("status", "pending")
     .order("reported_at", { ascending: false })
     .limit(50);
+
+  if (wardNumber) {
+    query = query.eq("ward_number", wardNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) return { error: error.message, data: null };
   return { data, error: null };

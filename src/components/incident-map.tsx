@@ -7,7 +7,8 @@ import type { Incident } from "@/lib/types";
 import { MADURAI_CENTER, MAP_DEFAULT_ZOOM } from "@/lib/constants";
 
 // Fix Leaflet default icon path issue in Next.js
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as L.Icon.Default & { _getIconUrl?: unknown })
+  ._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
@@ -37,9 +38,13 @@ function HeatmapLayer({ points }: { points: [number, number, number][] }) {
   useEffect(() => {
     if (!points.length) return;
 
-    // Dynamically import leaflet.heat
+    let isMounted = true;
+    let heatLayer: L.Layer | null = null;
+
     import("leaflet.heat").then(() => {
-      const heat = (
+      if (!isMounted) return;
+
+      heatLayer = (
         L as unknown as {
           heatLayer: (
             latlngs: [number, number, number][],
@@ -59,12 +64,15 @@ function HeatmapLayer({ points }: { points: [number, number, number][] }) {
           1.0: "#dc2626",
         },
       });
-      heat.addTo(map);
-
-      return () => {
-        map.removeLayer(heat);
-      };
+      heatLayer.addTo(map);
     });
+
+    return () => {
+      isMounted = false;
+      if (heatLayer) {
+        map.removeLayer(heatLayer);
+      }
+    };
   }, [map, points]);
 
   return null;
@@ -112,6 +120,7 @@ export default function IncidentMap({
         >
           <Popup>
             <div style={{ maxWidth: 200, fontFamily: "system-ui" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={incident.photo_url}
                 alt=""
