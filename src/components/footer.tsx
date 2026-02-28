@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
+import { DemoToggle } from "./demo-toggle";
 
 export function Footer() {
   return (
@@ -17,7 +18,7 @@ export function Footer() {
               CleanChain
             </h1>
           </div>
-          <div className="max-w-xl">
+          <div className="max-w-xl flex flex-col gap-6">
             <h1 className="text-sm sm:text-base text-slate-600 dark:text-slate-300 drop-shadow-sm leading-relaxed">
               Helo! I&apos;m Rishi, a Software Engineer. Clean Chain is an
               Internal Tool build to manage and supervise effective waste
@@ -25,6 +26,7 @@ export function Footer() {
               ahead! Feel free to explore my other work using the social links
               below.
             </h1>
+            <DemoToggle />
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { STORAGE_BUCKET, MAX_REPORTS_PER_HOUR } from "@/lib/constants";
 import { isWithinMadurai, estimateWardNumber } from "@/lib/geo";
+import { getDemoMode } from "./demo";
 
 export async function submitReport(formData: FormData) {
   const supabase = await createClient();
@@ -19,11 +20,9 @@ export async function submitReport(formData: FormData) {
     return { error: "Photo, latitude, and longitude are required." };
   }
 
-  // Validate Madurai geofence (bypass in demo mode)
-  if (
-    process.env.NEXT_PUBLIC_DEMO_MODE !== "true" &&
-    !isWithinMadurai({ lat, lng })
-  ) {
+  // Validate Madurai geofence
+  const isDemoMode = await getDemoMode();
+  if (!isDemoMode && !isWithinMadurai({ lat, lng })) {
     return {
       error:
         "Out of Zone: Reports are currently limited to the Madurai municipal limits.",
@@ -37,7 +36,7 @@ export async function submitReport(formData: FormData) {
   const userId = user?.id;
 
   // Rate limiting (3 per hour) - Disabled in Demo Mode
-  if (userId && process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
+  if (userId && !isDemoMode) {
     const { data: countData } = await serviceClient.rpc(
       "count_recent_reports",
       {
