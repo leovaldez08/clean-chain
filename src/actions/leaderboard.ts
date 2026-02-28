@@ -33,10 +33,6 @@ export async function getWardLeaderboard(): Promise<{
   if (error) return { data: null, error: error.message };
   if (!incidents || incidents.length === 0) return { data: [], error: null };
 
-  const now = Date.now();
-  const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
-  const fourteenDaysAgo = now - 14 * 24 * 60 * 60 * 1000;
-
   const wardMap = new Map<number, typeof incidents>();
 
   for (const inc of incidents) {
@@ -66,29 +62,24 @@ export async function getWardLeaderboard(): Promise<{
         )
       : 0;
 
-    // Risk Score computation
-    const recentIncidents = wardIncidents.filter(
-      (i) => new Date(i.reported_at).getTime() > sevenDaysAgo,
-    ).length;
+    // Demo-friendly Clean Score computation
+    // We want the score to react positively when things are resolved
+    const resolution_rate =
+      total_incidents > 0 ? resolved_count / total_incidents : 1;
 
-    const responsePenalty =
-      avg_response_minutes > 120 ? 15 : avg_response_minutes > 60 ? 10 : 0;
+    // Base 50 + up to 50 based on resolution rate
+    let score = 50 + 50 * resolution_rate;
 
-    const riskScore =
-      recentIncidents * 10 + responsePenalty + pending_count * 5;
-    const clean_score = Math.max(0, Math.min(100, 100 - riskScore));
+    // Penalize for slow avg response (cap penalty at 20 points)
+    const responsePenalty = Math.min(20, (avg_response_minutes / 60) * 10);
+    score -= responsePenalty;
 
-    // Trend: compare last 7 days vs previous 7 days
-    const thisWeek = wardIncidents.filter(
-      (i) => new Date(i.reported_at).getTime() > sevenDaysAgo,
-    ).length;
-    const lastWeek = wardIncidents.filter((i) => {
-      const t = new Date(i.reported_at).getTime();
-      return t > fourteenDaysAgo && t <= sevenDaysAgo;
-    }).length;
+    const clean_score = Math.max(0, Math.min(100, Math.round(score)));
 
+    // For a highly interactive demo, we want the trend to reflect the real-time resolution speed.
+    // If resolution rate > 50%, trend is up. If < 30%, trend is down.
     const trend: "up" | "down" | "stable" =
-      thisWeek < lastWeek ? "up" : thisWeek > lastWeek ? "down" : "stable";
+      resolution_rate > 0.5 ? "up" : resolution_rate < 0.3 ? "down" : "stable";
 
     scores.push({
       ward_number,
