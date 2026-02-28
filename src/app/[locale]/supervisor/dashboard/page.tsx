@@ -50,6 +50,16 @@ export default function SupervisorDashboard() {
 
   useEffect(() => {
     const supabase = createClient();
+    let currentWard: number | null = null;
+
+    // Extract ward number from email to filter realtime events client-side
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        const match = user.email.match(/ward(\d+)/i);
+        if (match) currentWard = parseInt(match[1], 10);
+      }
+    });
+
     const channel = supabase
       .channel("supervisor-incidents")
       .on(
@@ -57,9 +67,13 @@ export default function SupervisorDashboard() {
         { event: "INSERT", schema: "public", table: "incidents" },
         (payload) => {
           const inc = payload.new as Incident;
-          if (inc.status === "pending") {
+          // Only show toast and inject if it belongs to this supervisor's ward
+          if (
+            inc.status === "pending" &&
+            (!currentWard || inc.ward_number === currentWard)
+          ) {
             setIncidents((prev) => [inc, ...prev]);
-            toast.info("🚨 New incident reported!", {
+            toast.info("🚨 New incident reported in your zone!", {
               description:
                 inc.description?.slice(0, 80) || `Ward ${inc.ward_number}`,
               duration: 8000,

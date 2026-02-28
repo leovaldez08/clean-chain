@@ -24,13 +24,18 @@ export async function getIncidents(filters?: IncidentFilters) {
     query = query.lte("reported_at", filters.dateTo);
   }
 
-  const { data, error } = await query.order("reported_at", { ascending: false }).limit(500);
+  const { data, error } = await query
+    .order("reported_at", { ascending: false })
+    .limit(500);
 
   if (error) return { error: error.message, data: null };
   return { data, error: null };
 }
 
-export async function getMetrics(): Promise<{ data: AdminMetrics | null; error: string | null }> {
+export async function getMetrics(): Promise<{
+  data: AdminMetrics | null;
+  error: string | null;
+}> {
   const serviceClient = createServiceClient();
 
   const todayStart = new Date();
@@ -62,7 +67,10 @@ export async function getMetrics(): Promise<{ data: AdminMetrics | null; error: 
     .not("response_time_minutes", "is", null);
 
   const avgResponseMinutes = avgData?.length
-    ? Math.round(avgData.reduce((sum, r) => sum + (r.response_time_minutes || 0), 0) / avgData.length)
+    ? Math.round(
+        avgData.reduce((sum, r) => sum + (r.response_time_minutes || 0), 0) /
+          avgData.length,
+      )
     : 0;
 
   // Top hotspot wards
@@ -102,6 +110,14 @@ export async function loginAdmin(formData: FormData) {
   const password = formData.get("password") as string;
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function deleteIncident(id: string) {
+  const serviceClient = createServiceClient();
+  const { error } = await serviceClient.from("incidents").delete().eq("id", id);
+
   if (error) return { error: error.message };
   return { success: true };
 }

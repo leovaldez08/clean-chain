@@ -36,8 +36,8 @@ export async function submitReport(formData: FormData) {
   } = await supabase.auth.getUser();
   const userId = user?.id;
 
-  // Rate limiting (3 per hour)
-  if (userId) {
+  // Rate limiting (3 per hour) - Disabled in Demo Mode
+  if (userId && process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
     const { data: countData } = await serviceClient.rpc(
       "count_recent_reports",
       {

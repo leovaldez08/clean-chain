@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-import { getIncidents, getMetrics } from "@/actions/admin";
+import { getIncidents, getMetrics, deleteIncident } from "@/actions/admin";
 import {
   getWardLeaderboard,
   getRecurringHotspots,
@@ -33,6 +33,7 @@ import {
   Download,
   QrCode,
   Medal,
+  Trash2,
 } from "lucide-react";
 import {
   BarChart,
@@ -163,6 +164,26 @@ export default function AdminDashboard() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/admin");
+  };
+
+  const handleDelete = async () => {
+    if (!selectedIncident) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this incident permanently?",
+      )
+    )
+      return;
+
+    const result = await deleteIncident(selectedIncident.id);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+
+    toast.success("Incident deleted permanently");
+    setSelectedIncident(null);
+    loadData();
   };
 
   const exportCSV = () => {
@@ -761,12 +782,21 @@ export default function AdminDashboard() {
           <div className="bg-card rounded-2xl border border-border w-full max-w-lg max-h-[80vh] overflow-y-auto animate-fade-up">
             <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between rounded-t-2xl">
               <h3 className="font-semibold text-sm">Incident Details</h3>
-              <button
-                onClick={() => setSelectedIncident(null)}
-                className="p-1 hover:bg-muted rounded-lg transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDelete}
+                  title="Delete permanently"
+                  className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setSelectedIncident(null)}
+                  className="p-1 hover:bg-muted rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             <div className="p-4 space-y-4">
