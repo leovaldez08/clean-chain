@@ -7,7 +7,7 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import {
   Camera,
   MapPin,
@@ -26,12 +26,11 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageToggle } from "@/components/language-toggle";
-import { Footer } from "@/components/footer"; // Added this import
+import { Footer } from "@/components/footer";
 import { useTranslations } from "next-intl";
 import type { Incident } from "@/lib/types";
 import { getRecentResolvedIncidents } from "@/actions/impact";
 
-/* ── Animated floating particles for hero background ── */
 function FloatingParticles() {
   const [particles, setParticles] = useState<
     {
@@ -93,7 +92,6 @@ function FloatingParticles() {
   );
 }
 
-/* ── Animated grid lines ── */
 function AnimatedGrid() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -162,7 +160,6 @@ function AnimatedGrid() {
   );
 }
 
-/* ── Floating orbs ── */
 function FloatingOrbs() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -217,7 +214,6 @@ function FloatingOrbs() {
   );
 }
 
-/* ── Scanning line effect ── */
 function ScanLine() {
   return (
     <motion.div
@@ -228,7 +224,6 @@ function ScanLine() {
   );
 }
 
-/* ── Fade up variant ── */
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
@@ -247,7 +242,6 @@ const staggerContainer = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 
-/* ── Hero Section ── */
 function HeroSection() {
   const ref = useRef<HTMLDivElement>(null);
   const t = useTranslations("LandingPage");
@@ -260,7 +254,6 @@ function HeroSection() {
 
   const [typedText, setTypedText] = useState("");
   const fullText = t("title");
-  // const fullText = "Clean streets. Clear accountability.";
 
   useEffect(() => {
     let i = 0;
@@ -665,7 +658,7 @@ function StatsSection() {
   const t = useTranslations("LandingPage");
   const translatedStats = [
     { value: 100, label: t("statsCovered"), suffix: "" },
-    { value: 75, label: t("statsGpsAcc"), suffix: "m" },
+    { value: 100, label: t("statsGpsAcc"), suffix: "m" },
     { value: 3, label: t("statsRoles"), suffix: "" },
     { value: 0, label: t("statsLogin"), suffix: "" },
   ];
@@ -871,11 +864,13 @@ function ImpactSection() {
                     After
                   </span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={inc.clearance_photo_url || undefined}
-                    alt="After"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {inc.clearance_photo_url && (
+                    <img
+                      src={inc.clearance_photo_url}
+                      alt="After"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                 </div>
               </div>
               <div className="p-5">
@@ -973,7 +968,7 @@ function Navbar() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/icons/icon-512.png"
+                src="/icons/icon-512.webp"
                 alt="CleanChain"
                 className="w-full h-full object-contain"
               />

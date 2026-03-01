@@ -182,12 +182,12 @@ export default function SupervisorDashboard() {
         </header>
 
         <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-          <div className="rounded-xl border border-border overflow-hidden">
+          <div className="rounded-xl border border-border overflow-hidden relative h-48">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedIncident.photo_url}
               alt="Incident"
-              className="w-full h-48 object-cover"
+              className="w-full h-full object-cover"
             />
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
@@ -260,12 +260,12 @@ export default function SupervisorDashboard() {
               className="hidden"
             />
             {clearancePreview ? (
-              <div className="relative rounded-xl overflow-hidden border border-border">
+              <div className="relative rounded-xl overflow-hidden border border-border h-48">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={clearancePreview}
                   alt="Clearance"
-                  className="w-full h-48 object-cover"
+                  className="w-full h-full object-cover"
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
@@ -316,7 +316,7 @@ export default function SupervisorDashboard() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/icons/icon-192.png"
+              src="/icons/icon-192.webp"
               alt="CleanChain"
               className="w-8 h-8 rounded-lg"
             />

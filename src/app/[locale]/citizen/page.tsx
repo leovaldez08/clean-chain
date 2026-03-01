@@ -21,6 +21,8 @@ import type { UserImpact } from "@/actions/impact";
 import { isWithinMadurai, getDeviceInfo } from "@/lib/geo";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useTranslations } from "next-intl";
 
 const compressImage = async (file: File): Promise<File> => {
   return new Promise((resolve) => {
@@ -85,9 +87,20 @@ export default function CitizenPage() {
   const [impactLoading, setImpactLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const t = useTranslations("CitizenPage");
   // DEMO MODE STATE
-  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [demoWard, setDemoWard] = useState<number | "">("");
+
+  useEffect(() => {
+    const cookieState = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("cleanchain-demo-mode="));
+    const initialValue = cookieState
+      ? cookieState.split("=")[1] === "true"
+      : process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+    setTimeout(() => setIsDemoMode(initialValue), 0);
+  }, []);
 
   const DEMO_WARDS: Record<number, { name: string; lat: number; lng: number }> =
     {
@@ -133,7 +146,7 @@ export default function CitizenPage() {
 
   const grabGPS = () => {
     if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser.");
+      toast.error(t("toastNoGeo"));
       return;
     }
     setGpsLoading(true);
@@ -141,18 +154,16 @@ export default function CitizenPage() {
       (pos) => {
         const { latitude, longitude } = pos.coords;
         if (!isWithinMadurai({ lat: latitude, lng: longitude })) {
-          toast.error(
-            "Out of Zone: Reports are currently limited to the Madurai municipal limits.",
-          );
+          toast.error(t("toastZone"));
           setGpsLoading(false);
           return;
         }
         setCoords({ lat: latitude, lng: longitude });
         setGpsLoading(false);
-        toast.success("GPS location captured!");
+        toast.success(t("toastGpsSuccess"));
       },
       () => {
-        toast.error("Failed to get location. Please enable GPS and try again.");
+        toast.error(t("toastGpsFail"));
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
@@ -160,8 +171,8 @@ export default function CitizenPage() {
   };
 
   const handleSubmit = async () => {
-    if (!photo) return toast.error("Please capture a photo first.");
-    if (!coords) return toast.error("Please capture your GPS location.");
+    if (!photo) return toast.error(t("toastNoPhoto"));
+    if (!coords) return toast.error(t("toastNoCoords"));
 
     startTransition(async () => {
       try {
@@ -202,7 +213,7 @@ export default function CitizenPage() {
           setSubmitted(true);
         }
       } catch {
-        toast.error("Something went wrong. Please try again.");
+        toast.error(t("toastFail"));
       }
     });
   };
@@ -217,11 +228,8 @@ export default function CitizenPage() {
           <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-emerald-500" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Report Submitted!</h1>
-          <p className="text-muted-foreground mb-8">
-            Thank you for helping keep Madurai clean. Your report has been
-            logged and will be addressed by our team.
-          </p>
+          <h1 className="text-2xl font-bold mb-2">{t("successTitle")}</h1>
+          <p className="text-muted-foreground mb-8">{t("successDesc")}</p>
           <button
             onClick={() => {
               setSubmitted(false);
@@ -247,16 +255,19 @@ export default function CitizenPage() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/icons/icon-192.png"
+              src="/icons/icon-192.webp"
               alt="CleanChain"
               className="w-8 h-8 rounded-lg"
             />
             <div>
               <h1 className="font-bold text-sm">CleanChain</h1>
-              <p className="text-xs text-muted-foreground">Citizen Reporter</p>
+              <p className="text-xs text-muted-foreground">{t("role")}</p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Tab Bar */}
@@ -270,7 +281,7 @@ export default function CitizenPage() {
             }`}
           >
             <Send className="w-4 h-4 inline mr-1.5" />
-            Report
+            {t("tabReport")}
           </button>
           <button
             onClick={() => setActiveTab("impact")}
@@ -281,7 +292,7 @@ export default function CitizenPage() {
             }`}
           >
             <Sparkles className="w-4 h-4 inline mr-1.5" />
-            My Impact
+            {t("tabImpact")}
           </button>
         </div>
       </header>
@@ -294,21 +305,21 @@ export default function CitizenPage() {
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Camera className="w-4 h-4" />
               </div>
-              <span>1. Snap</span>
+              <span>{t("stepSnap")}</span>
             </div>
             <div className="w-8 h-[2px] bg-border/50 rounded-full" />
             <div className="flex flex-col items-center gap-1">
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <MapPin className="w-4 h-4" />
               </div>
-              <span>2. Pin</span>
+              <span>{t("stepPin")}</span>
             </div>
             <div className="w-8 h-[2px] bg-border/50 rounded-full" />
             <div className="flex flex-col items-center gap-1">
               <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                 <Send className="w-4 h-4" />
               </div>
-              <span>3. Done</span>
+              <span>{t("stepDone")}</span>
             </div>
           </div>
 
@@ -328,12 +339,14 @@ export default function CitizenPage() {
             />
             {photoPreview ? (
               <div className="relative rounded-xl overflow-hidden border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={photoPreview}
-                  alt="Captured incident"
-                  className="w-full h-64 object-cover"
-                />
+                <div className="w-full h-64 relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photoPreview}
+                    alt="Captured incident"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/60 text-white text-xs font-medium rounded-lg hover:bg-black/80 transition-colors cursor-pointer"
@@ -382,12 +395,12 @@ export default function CitizenPage() {
                 {gpsLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Acquiring GPS...
+                    {t("acquiringGps")}
                   </>
                 ) : (
                   <>
                     <MapPin className="w-4 h-4" />
-                    Capture My Location
+                    {t("captureLocation")}
                   </>
                 )}
               </button>
@@ -398,7 +411,7 @@ export default function CitizenPage() {
               <div className="mt-4 p-4 rounded-xl border-2 border-primary/20 bg-primary/5 animate-fade-in">
                 <label className="text-xs font-bold text-primary mb-2 flex flex-col">
                   <span className="flex items-center gap-1 uppercase tracking-wider mb-1">
-                    <Sparkles className="w-3.5 h-3.5" /> Demo Override
+                    <Sparkles className="w-3.5 h-3.5" /> {t("demoOverride")}
                   </span>
                   <span className="text-muted-foreground font-normal">
                     Select a pilot ward directly to spoof GPS location for
@@ -420,13 +433,13 @@ export default function CitizenPage() {
                         lng: DEMO_WARDS[wardId].lng,
                       });
                       toast.success(
-                        `Demo GPS locked to ${DEMO_WARDS[wardId].name}`,
+                        t("toastDemoLock", { ward: DEMO_WARDS[wardId].name }),
                       );
                     }
                   }}
                   className="w-full mt-2 p-3 rounded-lg border border-border bg-background text-sm cursor-pointer outline-none focus:ring-2 focus:ring-primary/50"
                 >
-                  <option value="">-- Let Browser Grab Real GPS --</option>
+                  <option value="">{t("realGpsOption")}</option>
                   {Object.entries(DEMO_WARDS).map(([id, info]) => (
                     <option key={id} value={id}>
                       {info.name}
@@ -509,7 +522,7 @@ export default function CitizenPage() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Overflowing bin near the bus stop..."
+              placeholder={t("descPlaceholder")}
               rows={3}
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder:text-muted-foreground"
             />
@@ -523,19 +536,18 @@ export default function CitizenPage() {
             {isPending ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Submitting...
+                {t("submitting")}
               </>
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                Submit Report
+                {t("submitBtn")}
               </>
             )}
           </button>
 
           <p className="text-xs text-muted-foreground text-center">
-            By submitting, your GPS location and device info will be recorded
-            for accountability.
+            {t("disclaimer")}
           </p>
         </div>
       ) : (
@@ -587,13 +599,13 @@ export default function CitizenPage() {
                     {impact.cleanScore}
                   </span>
                 </div>
-                <h2 className="text-lg font-bold">Your Clean Score</h2>
+                <h2 className="text-lg font-bold">{t("scoreTitle")}</h2>
                 <p className="text-sm text-muted-foreground">
                   {impact.cleanScore >= 80
-                    ? "🌟 Champion Reporter!"
+                    ? t("scoreChamp")
                     : impact.cleanScore >= 50
-                      ? "💪 Active Contributor"
-                      : "🌱 Getting Started"}
+                      ? t("scoreActive")
+                      : t("scoreStart")}
                 </p>
               </div>
 
@@ -602,12 +614,16 @@ export default function CitizenPage() {
                 <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
                   <BarChart3 className="w-5 h-5 text-blue-500 mb-2" />
                   <p className="text-2xl font-bold">{impact.totalReports}</p>
-                  <p className="text-xs text-muted-foreground">Reports Filed</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("statReports")}
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 mb-2" />
                   <p className="text-2xl font-bold">{impact.resolvedReports}</p>
-                  <p className="text-xs text-muted-foreground">Resolved</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("statResolved")}
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
                   <Clock className="w-5 h-5 text-amber-500 mb-2" />
@@ -615,7 +631,9 @@ export default function CitizenPage() {
                     {impact.avgCleanupMinutes}
                     <span className="text-sm font-normal">m</span>
                   </p>
-                  <p className="text-xs text-muted-foreground">Avg Cleanup</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("statAvg")}
+                  </p>
                 </div>
                 <div className="p-4 rounded-xl bg-violet-500/5 border border-violet-500/20">
                   <Trophy className="w-5 h-5 text-violet-500 mb-2" />
@@ -636,17 +654,14 @@ export default function CitizenPage() {
               {impact.totalReports === 0 && (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground text-sm">
-                    No reports yet. Switch to the Report tab and start making an
-                    impact!
+                    {t("noReports")}
                   </p>
                 </div>
               )}
             </div>
           ) : (
             <div className="text-center py-20">
-              <p className="text-muted-foreground">
-                Unable to load impact data.
-              </p>
+              <p className="text-muted-foreground">{t("errImpact")}</p>
             </div>
           )}
         </div>

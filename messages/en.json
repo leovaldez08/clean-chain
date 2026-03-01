@@ -21,7 +21,7 @@
     "featureProximityTitle": "Proximity Enforced",
     "featureProximityDesc": "Supervisors must be within 100m of the incident location to submit clearance.",
     "featureRealtimeTitle": "Real-time Updates",
-    "featureRealtimeDesc": "Admin dashboard updates instantly via Supabase Realtime. Zero page refreshes.",
+    "featureRealtimeDesc": "Admin dashboard updates instantly via Realtime Websocket. Zero page refreshes.",
     "featureHeatmapTitle": "Heatmap Analytics",
     "featureHeatmapDesc": "Identify waste hotspots across all 100 wards with interactive Leaflet heatmaps.",
     "featureResponseTitle": "Response Tracking",
@@ -48,11 +48,75 @@
     "statsRoles": "User Roles",
     "statsLogin": "Login Required",
 
-    "ctaMainBold": "Every ward accountable.",
-    "ctaMainColor": "Every incident tracked.",
-    "ctaDesc": "CleanChain brings transparency to waste management in Madurai. Start reporting now — zero friction, maximum impact.",
+    "ctaMainBold": "Every Ward Accountable.",
+    "ctaMainColor": "Every Incident Tracked.",
+    "ctaDesc": "CleanChain brings transparency to waste management in Madurai. Start reporting now - Zero Friction, Maximum Impact.",
     "pwa": "PWA Installable",
     "rolesys": "3 Role System",
     "gpsver": "GPS Verified"
+  },
+  "CitizenPage": {
+    "role": "Citizen Reporter",
+    "tabReport": "Report",
+    "tabImpact": "My Impact",
+
+    "stepSnap": "1. Snap",
+    "stepPin": "2. Pin",
+    "stepDone": "3. Done",
+
+    "photoLabel": "Photo Evidence",
+    "retake": "Retake",
+    "tapToCapture": "Tap to capture photo",
+
+    "gpsLabel": "GPS Location",
+    "locationCaptured": "Location captured",
+    "acquiringGps": "Acquiring GPS...",
+    "captureLocation": "Capture My Location",
+
+    "demoOverride": "Demo Override",
+    "demoOverrideDesc": "Select a pilot ward directly to spoof GPS location for presentation.",
+    "realGpsOption": "-- Let Browser Grab Real GPS --",
+
+    "severityLabel": "Waste Type / Severity",
+    "sevLowTitle": "Organic / Wet Waste",
+    "sevLowDesc": "Food waste, leaves, compostable (Low Severity)",
+    "sevMedTitle": "Recyclable / Dry Waste",
+    "sevMedDesc": "Plastics, paper, glass, cardboard (Medium Severity)",
+    "sevHighTitle": "Hazardous / Mixed / E-Waste",
+    "sevHighDesc": "Batteries, medical, large mixed dumps (High Severity)",
+
+    "descLabel": "Description",
+    "optional": "(optional)",
+    "descPlaceholder": "e.g. Overflowing bin near the bus stop...",
+
+    "submitting": "Submitting...",
+    "submitBtn": "Submit Report",
+    "disclaimer": "By submitting, your GPS location and device info will be recorded for accountability.",
+
+    "scoreTitle": "Your Clean Score",
+    "scoreChamp": "🌟 Champion Reporter!",
+    "scoreActive": "💪 Active Contributor",
+    "scoreStart": "🌱 Getting Started",
+
+    "statReports": "Reports Filed",
+    "statResolved": "Resolved",
+    "statAvg": "Avg Cleanup",
+    "statRate": "Resolution Rate",
+
+    "noReports": "No reports yet. Switch to the Report tab and start making an impact!",
+    "errImpact": "Unable to load impact data.",
+
+    "successTitle": "Report Submitted!",
+    "successDesc": "Thank you for helping keep Madurai clean. Your report has been logged and will be addressed by our team.",
+    "btnAnother": "Report Another Incident",
+
+    "toastNoGeo": "Geolocation is not supported by your browser.",
+    "toastZone": "Out of Zone: Reports are currently limited to the Madurai municipal limits.",
+    "toastGpsSuccess": "GPS location captured!",
+    "toastGpsFail": "Failed to get location. Please enable GPS and try again.",
+    "toastNoPhoto": "Please capture a photo first.",
+    "toastNoCoords": "Please capture your GPS location.",
+    "toastFail": "Something went wrong. Please try again.",
+    "toastDemoLock": "Demo GPS locked to {ward}"
   }
 }

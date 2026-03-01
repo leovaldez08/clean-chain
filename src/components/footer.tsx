@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import Image from "next/image";
 import { Github, Linkedin, Twitter, Instagram } from "lucide-react";
 import { DemoToggle } from "./demo-toggle";
 
@@ -8,11 +9,12 @@ export function Footer() {
       <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
         <div className="md:flex md:justify-between px-4 sm:px-8">
           <div className="mb-6 md:mb-0 flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/icons/icon-192.png"
+            <Image
+              src="/icons/icon-192.webp"
               alt="CleanChain Logo"
-              className="w-14 h-14 rounded-lg"
+              width={56}
+              height={56}
+              className="rounded-lg"
             />
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mr-16 mt-2">
               CleanChain
@@ -20,11 +22,11 @@ export function Footer() {
           </div>
           <div className="max-w-xl flex flex-col gap-6">
             <h1 className="text-sm sm:text-base text-slate-600 dark:text-slate-300 drop-shadow-sm leading-relaxed">
-              Helo! I&apos;m Rishi, a Software Engineer. Clean Chain is an
-              Internal Tool build to manage and supervise effective waste
-              management in Urban Cities. Stay tuned for some awesome stuff
-              ahead! Feel free to explore my other work using the social links
-              below.
+              Helo! I&apos;m Rishi, a Software Engineer. Clean Chain is
+              Progressive Web Application built to manage and supervise
+              effective waste management in Urban Cities. Stay tuned for some
+              awesome stuff ahead! Feel free to explore my other work using the
+              social links below.
             </h1>
             <DemoToggle />
           </div>

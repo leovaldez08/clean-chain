@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/icons/icon-512.png",
+        url: "/icons/icon-512.webp",
         width: 512,
         height: 512,
         alt: "CleanChain Logo",
@@ -54,11 +54,11 @@ export const metadata: Metadata = {
     title: "Clean Chain",
     description:
       "Report waste. Track cleanup. Hold wards accountable. All from your phone.",
-    images: ["/icons/icon-512.png"],
+    images: ["/icons/icon-512.webp"],
   },
   icons: {
-    icon: "/icons/icon-192.png",
-    apple: "/icons/icon-192.png",
+    icon: "/icons/icon-192.webp",
+    apple: "/icons/icon-192.webp",
   },
   appleWebApp: {
     capable: true,
