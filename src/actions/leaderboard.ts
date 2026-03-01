@@ -215,3 +215,74 @@ export async function getTrendData(): Promise<{
 
   return { data: trendData, error: null };
 }
+
+export interface EmergingHotspot {
+  ward_number: number;
+  current_incidents: number;
+  trend_pattern: number[];
+  acceleration_rate: number;
+}
+
+export async function getEmergingHotspots(): Promise<{
+  data: EmergingHotspot[] | null;
+  error: string | null;
+}> {
+  const serviceClient = createServiceClient();
+
+  const sevenDaysAgo = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  const { data: incidents, error } = await serviceClient
+    .from("incidents")
+    .select("ward_number, reported_at")
+    .not("ward_number", "is", null)
+    .gte("reported_at", sevenDaysAgo);
+
+  if (error) return { data: null, error: error.message };
+  if (!incidents) return { data: [], error: null };
+
+  const wardDayCounts = new Map<number, number[]>();
+
+  incidents.forEach((inc) => {
+    if (inc.ward_number !== null && !wardDayCounts.has(inc.ward_number)) {
+      wardDayCounts.set(inc.ward_number, new Array(7).fill(0));
+    }
+  });
+
+  const nowMs = Date.now();
+  for (const inc of incidents) {
+    if (inc.ward_number === null) continue;
+    const msAgo = nowMs - new Date(inc.reported_at).getTime();
+    const daysAgo = Math.floor(msAgo / (24 * 60 * 60 * 1000));
+    if (daysAgo >= 0 && daysAgo < 7) {
+      const index = 6 - daysAgo;
+      wardDayCounts.get(inc.ward_number)![index]++;
+    }
+  }
+
+  const emerging: EmergingHotspot[] = [];
+
+  for (const [ward, counts] of wardDayCounts.entries()) {
+    const recent = counts.slice(-3); // Last 3 days
+    const isIncreasing = recent[0] < recent[1] && recent[1] < recent[2];
+    const hasVolume = recent[2] >= 2;
+
+    const avgOld = counts.slice(0, 4).reduce((a, b) => a + b, 0) / 4;
+    const avgNew = recent.reduce((a, b) => a + b, 0) / 3;
+    const constitutesSpike = avgNew > avgOld * 1.5 && avgNew >= 2;
+
+    if ((isIncreasing && hasVolume) || constitutesSpike) {
+      emerging.push({
+        ward_number: ward,
+        current_incidents: recent[2],
+        trend_pattern: counts,
+        acceleration_rate:
+          avgOld > 0 ? Number(((avgNew - avgOld) / avgOld).toFixed(2)) : avgNew,
+      });
+    }
+  }
+
+  emerging.sort((a, b) => b.acceleration_rate - a.acceleration_rate);
+  return { data: emerging, error: null };
+}

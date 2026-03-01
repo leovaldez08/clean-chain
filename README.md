@@ -3,7 +3,7 @@
   <img src="public/icons/icon-512.webp" alt="CleanChain Logo" width="120" />
   <h1 align="center">CleanChain</h1>
   <p align="center">
-    <strong>Ward-level Waste Accountability Platform for Madurai</strong>
+    <strong>Ward-level Waste Accountability & Predictive Intelligence Platform for Madurai</strong>
   </p>
 </div>
 
@@ -13,72 +13,175 @@
 
 In rapidly growing metropolitan areas like Madurai, civic waste accumulation often goes unnoticed until it becomes a public health hazard. Traditional municipal ticketing systems are archaic, opaque, and discourage citizen participation due to a lack of feedback loops. Citizens report issues into a "black box," and supervisors lack data-driven insights to allocate sanitary workers efficiently.
 
+Most systems are **purely reactive** — they respond only after complaints pile up.
+
+---
+
 ## 💡 How CleanChain Solves It
 
-CleanChain bridges the gap between citizens, sanitary workers, and municipal authorities through **radical transparency and hyperlocal accountability**.
+CleanChain bridges the gap between citizens, sanitary workers, and municipal authorities through **radical transparency, hyperlocal accountability, and predictive intelligence**.
 
-Instead of a hidden ticketing funnel, CleanChain operates as an open, real-time geographic ledge. Citizens snap photos of waste, pin the exact GPS coordinates, and the incident immediately appears on an open map. Supervisors are instantly notified, and when the waste is cleared, a "Before/After" photo timeline is permanently recorded on the blockchain-inspired public ledger.
+Instead of a hidden ticketing funnel, CleanChain operates as an open, real-time geographic ledger. Citizens snap photos of waste, pin exact GPS coordinates, and the incident immediately appears on a public map. Supervisors are instantly notified, and when the waste is cleared, a "Before/After" photo timeline is permanently recorded.
+
+Beyond visibility, CleanChain introduces **Proactive Urban Sanitation Intelligence** — forecasting emerging waste hotspots before escalation.
 
 ### What makes it different from standard ticketing?
 
 1. **No Black Boxes:** Every report is public. Citizens can see exactly how long a ward takes to resolve an issue.
-2. **Gamification & Engagement:** Citizens earn a "Clean Score" for accurate reporting, turning civic duty into a rewarding experience.
-3. **Hyperlocal Leaderboards:** Wards are ranked based on their "Risk Score" and "Average Response Time," naturally incentivizing municipal competitiveness.
-4. **Frictionless Onboarding:** No mandatory lengthy sign-ups. Anonymous reporting leverages Supabase's anonymous sessions to reduce the barrier to entry to zero.
+2. **Proactive, Not Reactive:** 7-day trailing averages + statistical slope acceleration detect “Emerging Risk Zones” before they explode.
+3. **Gamification & Engagement:** Citizens earn a "Clean Score" for accurate reporting, turning civic duty into a rewarding experience.
+4. **Hyperlocal Leaderboards:** Wards are ranked based on Risk Score and Average Response Time, incentivizing municipal competitiveness.
+5. **Frictionless Onboarding:** Anonymous sessions reduce the barrier to entry to near zero.
+6. **Fraud & Spam Prevention:** Smart GPS geofencing, cooldown logic, and rate limiting ensure data integrity.
 
 ---
 
 ## 🎯 Impact Statement
 
-**"Clean streets. Clear accountability."**
-CleanChain shifts municipal waste management from reactive damage control to proactive, data-driven stewardship by turning every smartphone into a node for civic accountability, ensuring Madurai remains pristine for future generations.
+**"Clean streets. Clear accountability. Predictive action."**
+
+CleanChain shifts municipal waste management from reactive damage control to proactive, data-driven stewardship by turning every smartphone into a node for civic accountability — ensuring Madurai remains pristine for future generations.
+
+Target Impact:
+
+- ⏱ Reduce response times by up to 40%
+- 📍 Identify recurring dumping zones before escalation
+- 📊 Enable data-backed workforce allocation
 
 ---
 
 ## ✨ Key Features
 
-### For Citizens
+### For Citizens (PWA Experience)
 
 - 📸 **Geotagged Photo Evidence:** Capture and report waste precisely where you stand.
-- 🌍 **Bilingual Interface:** Fully localized in English and Tamil (`next-intl`) for maximum accessibility in Tamil Nadu.
-- 🏆 **My Impact Dashboard:** Track your personal Clean Score, total reports, and community impact.
-- 🔒 **Anonymous Reporting:** Zero-friction onboarding via ephemeral anonymous sessions.
-- ⏳ **Smart Rate-Limiting:** Built-in IP throttling and geolocation geofencing limits spam and ensures quality reports.
+- 📱 **QR-Code Quick Reporting:** Scan ward-based QR codes for instant contextual reporting.
+- 🌍 **Bilingual Interface:** Fully localized in English and Tamil (`next-intl`) for maximum accessibility.
+- 🏆 **My Impact Dashboard:** Track your Clean Score, reports submitted, and resolution rates.
+- 🔒 **Anonymous Reporting:** Zero-friction onboarding via ephemeral sessions.
+- 📡 **Offline-Capable PWA:** Report waste even with unstable connectivity.
+- ⏳ **Smart Rate-Limiting:** IP throttling and geofencing to prevent spam and malicious usage.
 
-### For Supervisors & Admins
+---
 
-- 🗺️ **Live Incident Heatmaps:** Leaflet-powered geographic visualizations of active and cleared waste zones.
-- 🚨 **Automated Hotspot Detection:** Triggers SQL algorithms to flag areas where waste is recurrently dumped.
-- 📷 **Before & After Verifications:** Side-by-side photographic evidence of completed civic tasks.
-- 📊 **Enterprise Analytics Dashboard:** Real-time metrics on response times, resolution rates, and active ward rankings.
+### For Supervisors
 
-### Universal
+- 📋 **Live Incident Queue:** Real-time list of pending incidents within assigned wards.
+- 📷 **Before & After Verifications:** Mandatory photographic proof of resolution.
+- 📊 **Performance Metrics:** Track average response time and resolution percentages.
+- 🗺️ **Ward-Level Heatmaps:** Geographic density visualization of active incidents.
 
-- 📱 **Native PWA Experience:** Installable directly to the home screen (Android/iOS) for offline-capable reporting.
-- 🌓 **Dynamic Theming:** Seamless Dark and Light mode integrations.
+---
+
+### For Admins & Municipal Strategy Teams
+
+🧠 **Predictive Hotspot Forecasting:**  
+ Statistical trend acceleration (7-day sliding window + slope detection) flags Emerging Risk Zones.
+
+🔥 **Automated Hotspot Detection:**  
+ Clusters GPS reports within a 100m radius to detect recurring dumping points.
+
+🗺️ **Dynamic Heatmaps:**  
+ Real-time visual mapping of active and resolved incidents city-wide.
+
+🏆 **Ward Leaderboards:**  
+ Data-driven Clean Scores and Risk Rankings per ward.
+
+📊 **Enterprise Analytics Dashboard:**  
+ Metrics on response times, resolution rates, and trend forecasting.
+
+📁 **CSV Strategic Exports:**  
+ Export structured incident datasets for audits, compliance, or deep-dive analysis.
+
+⚡ **Real-Time Monitoring:**  
+ Supabase subscriptions stream live updates without refresh.
+
+---
+
+### Universal Platform Features
+
+- 📱 **Native PWA Installation:** Add to home screen on Android/iOS.
+- 🌓 **Dynamic Theming:** Seamless Dark & Light mode.
+- ♿ **Accessible Design:** WCAG-compliant color ratios and aria-labels.
+- 🔐 **Enterprise-Grade RLS Security:** Strict ward-based data isolation.
 
 ---
 
 ## 🛠️ Technical Architecture & Stack
 
-CleanChain is built on a modern, edge-ready tech stack designed for high throughput and rapid iteration.
+CleanChain is built on a modern, edge-ready tech stack designed for high throughput, predictive analytics, and rapid iteration.
+
+---
 
 ### Tech Stack
 
-- **Frontend:** [Next.js 15](https://nextjs.org/) (App Router, React Compiler)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) & [Framer Motion](https://www.framer.com/motion/) for fluid animations
-- **Backend as a Service:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage edge-network)
-- **Maps:** `react-leaflet` & OpenStreetMap
-- **Localization:** `next-intl`
-- **PWA Engine:** `@ducanh2912/next-pwa`
+#### Frontend
+
+- **Framework:** Next.js 15+ (App Router, Server Actions, React Compiler)
+- **Styling:** Tailwind CSS v4
+- **Animations:** Framer Motion
+- **Icons:** lucide-react
+- **Localization:** next-intl
+
+#### Backend & Infrastructure
+
+- **Backend as a Service:** Supabase
+  - PostgreSQL (Row Level Security)
+  - Realtime Subscriptions (WebSockets)
+  - Auth (Anonymous + Role-based sessions)
+  - Storage (Optimized image hosting)
+- **Maps:** react-leaflet + OpenStreetMap
+- **PWA Engine:** @ducanh2912/next-pwa
+
+---
 
 ### Architecture Highlights
 
-1. **Edge-Ready Analytics:** Heavy computations like _Hotspot Detection_ and _Ward Risk Scoring_ are executed natively via PostgreSQL Functions (`rpc`) and Triggers directly on the database level, drastically reducing serverless function invocation times.
-2. **Localized Routing:** Implements standard i18n middleware routing (`/[locale]/...`) allowing Google ranking for both English and Tamil search queries.
-3. **Optimized Assets:** Transitioned Next.js standard `Image` pipelines and heavy PNGs completely to natively compressed WebP formats for instant 3G/4G PWA initialization.
+1. **Edge-Ready Predictive Analytics**
+   - Hotspot Detection
+   - Ward Risk Scoring
+   - Trend Acceleration (Slope over 7-day trailing window)  
+     Executed directly via PostgreSQL Functions (`rpc`) and triggers to minimize serverless overhead.
+
+2. **Geospatial Intelligence Layer**
+   - Groups incidents within 100m radius
+   - Detects recurring failure zones
+   - Calculates density heatmaps
+
+3. **Localized Routing (SEO-Optimized)**
+   - i18n middleware routing (`/[locale]/...`)
+   - Indexable English & Tamil pages
+
+4. **Optimized Asset Delivery**
+   - WebP-based image pipeline
+   - Lightweight PWA initialization for 3G/4G environments
+
+5. **Security by Design**
+   - Strict Row Level Security policies
+   - Supervisor-ward isolation
+   - Payload validation at storage bucket level
 
 ---
+
+## 🚀 Local Development Setup
+
+Follow these steps to spin up the full CleanChain ecosystem locally.
+
+---
+
+### Prerequisites
+
+- Node.js (v20+ recommended)
+- Docker Desktop (for local Supabase)
+- Supabase CLI (`npm install -g supabase`)
+
+---
+
+### 1. Clone the Repository
+
+````bash
+git clone https://github.com/leovaldez08/clean-chain.git
+cd clean-chain
 
 ## 🚀 Local Development Setup
 
@@ -95,7 +198,7 @@ Follow these steps to spin up the full CleanChain ecosystem locally.
 ```bash
 git clone https://github.com/leovaldez08/clean-chain.git
 cd clean-chain
-```
+````
 
 ### 2. Install Dependencies
 

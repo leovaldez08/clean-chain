@@ -241,7 +241,7 @@ export default function CitizenPage() {
             }}
             className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-xl transition-colors cursor-pointer"
           >
-            Report Another Incident
+            {t("btnAnother")}
           </button>
         </div>
       </main>
@@ -326,7 +326,7 @@ export default function CitizenPage() {
           <section className="space-y-3">
             <label className="text-sm font-semibold flex items-center gap-2">
               <Camera className="w-4 h-4 text-emerald-500" />
-              Photo Evidence
+              {t("photoLabel")}
             </label>
             <input
               ref={fileInputRef}
@@ -351,7 +351,7 @@ export default function CitizenPage() {
                   onClick={() => fileInputRef.current?.click()}
                   className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/60 text-white text-xs font-medium rounded-lg hover:bg-black/80 transition-colors cursor-pointer"
                 >
-                  Retake
+                  {t("retake")}
                 </button>
               </div>
             ) : (
@@ -363,7 +363,7 @@ export default function CitizenPage() {
                   <Camera className="w-6 h-6 text-emerald-500" />
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  Tap to capture photo
+                  {t("tapToCapture")}
                 </span>
               </button>
             )}
@@ -372,14 +372,14 @@ export default function CitizenPage() {
           <section className="space-y-3">
             <label className="text-sm font-semibold flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-500" />
-              GPS Location
+              {t("gpsLabel")}
             </label>
             {coords ? (
               <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                 <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                 <div className="text-sm">
                   <p className="font-medium text-emerald-700 dark:text-emerald-300">
-                    Location captured
+                    {t("locationCaptured")}
                   </p>
                   <p className="text-muted-foreground text-xs font-mono">
                     {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
@@ -454,7 +454,7 @@ export default function CitizenPage() {
             <label className="text-sm font-semibold flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-emerald-500" />
-                Waste Type / Severity
+                {t("severityLabel")}
               </div>
             </label>
             <div className="grid grid-cols-1 gap-2">
@@ -468,10 +468,10 @@ export default function CitizenPage() {
               >
                 <span className="font-bold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-500" />
-                  Organic / Wet Waste
+                  {t("sevLowTitle")}
                 </span>
                 <span className="text-xs opacity-80 font-normal ml-4">
-                  Food waste, leaves, compostable (Low Severity)
+                  {t("sevLowDesc")}
                 </span>
               </button>
 
@@ -485,10 +485,10 @@ export default function CitizenPage() {
               >
                 <span className="font-bold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  Recyclable / Dry Waste
+                  {t("sevMedTitle")}
                 </span>
                 <span className="text-xs opacity-80 font-normal ml-4">
-                  Plastics, paper, glass, cardboard (Medium Severity)
+                  {t("sevMedDesc")}
                 </span>
               </button>
 
@@ -502,10 +502,10 @@ export default function CitizenPage() {
               >
                 <span className="font-bold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-500" />
-                  Hazardous / Mixed / E-Waste
+                  {t("sevHighTitle")}
                 </span>
                 <span className="text-xs opacity-80 font-normal ml-4">
-                  Batteries, medical, large mixed dumps (High Severity)
+                  {t("sevHighDesc")}
                 </span>
               </button>
             </div>
@@ -514,9 +514,9 @@ export default function CitizenPage() {
           <section className="space-y-3">
             <label className="text-sm font-semibold flex items-center gap-2">
               <Info className="w-4 h-4 text-emerald-500" />
-              Description{" "}
+              {t("descLabel")}{" "}
               <span className="text-muted-foreground font-normal">
-                (optional)
+                {t("optional")}
               </span>
             </label>
             <textarea
@@ -646,7 +646,7 @@ export default function CitizenPage() {
                     %
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Resolution Rate
+                    {t("statRate")}
                   </p>
                 </div>
               </div>

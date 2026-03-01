@@ -9,9 +9,14 @@ import {
   getWardLeaderboard,
   getRecurringHotspots,
   getTrendData,
+  getEmergingHotspots,
 } from "@/actions/leaderboard";
 import type { Incident, AdminMetrics, IncidentFilters } from "@/lib/types";
-import type { WardScore, RecurringHotspot } from "@/actions/leaderboard";
+import type {
+  WardScore,
+  RecurringHotspot,
+  EmergingHotspot,
+} from "@/actions/leaderboard";
 import {
   MapPin,
   BarChart3,
@@ -78,6 +83,9 @@ export default function AdminDashboard() {
   const [trendData, setTrendData] = useState<
     { date: string; reports: number; avgResponse: number }[]
   >([]);
+  const [emergingHotspots, setEmergingHotspots] = useState<EmergingHotspot[]>(
+    [],
+  );
   const [now] = useState(() => Date.now());
   const router = useRouter();
 
@@ -103,18 +111,21 @@ export default function AdminDashboard() {
       leaderboardResult,
       hotspotsResult,
       trendResult,
+      emergingResult,
     ] = await Promise.all([
       getIncidents(filters),
       getMetrics(),
       getWardLeaderboard(),
       getRecurringHotspots(),
       getTrendData(),
+      getEmergingHotspots(),
     ]);
     if (incidentsResult.data) setIncidents(incidentsResult.data);
     if (metricsResult.data) setMetrics(metricsResult.data);
     if (leaderboardResult.data) setWardScores(leaderboardResult.data);
     if (hotspotsResult.data) setHotspots(hotspotsResult.data);
     if (trendResult.data) setTrendData(trendResult.data);
+    if (emergingResult.data) setEmergingHotspots(emergingResult.data);
     setLoading(false);
   }, [filters]);
 
@@ -249,7 +260,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/icons/icon-192.png"
+              src="/icons/icon-192.webp"
               alt="CleanChain"
               className="w-8 h-8 rounded-lg"
             />
@@ -638,6 +649,55 @@ export default function AdminDashboard() {
             </div>
           </ErrorBoundary>
         </div>
+
+        {/* Emerging Risk Zones (Predictive) */}
+        {emergingHotspots.length > 0 && (
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <TrendingUp className="w-4 h-4" />
+              Emerging Risk Zones (AI Predictive)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {emergingHotspots.map((h) => (
+                <div
+                  key={h.ward_number}
+                  className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-amber-500/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        Ward {h.ward_number}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground font-medium">
+                        Increasing trend detected
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                      +{Math.round(h.acceleration_rate * 100)}% spike
+                    </p>
+                    {/* Sparkline visualization */}
+                    <div className="flex items-end gap-0.5 h-4 mt-1">
+                      {h.trend_pattern.map((val, i) => (
+                        <div
+                          key={i}
+                          className="w-1.5 bg-amber-500/40 rounded-t-sm"
+                          style={{
+                            height: `${Math.max(20, (val / Math.max(...h.trend_pattern, 1)) * 100)}%`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Ward Leaderboard */}
         {wardScores.length > 0 && (
